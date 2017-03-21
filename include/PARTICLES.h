@@ -18,14 +18,18 @@ using namespace Eigen;
 
 class PARTICLES{
 
-private:
+public:
     double m_particlesPerDirection;
     double m_cubeLength;
+	double m_area;
     double m_numberOfParticles;
     double m_particleGridSpacing;
     Vector2d m_initialVelocity;
     Vector2d m_anchorPoint;
-public:
+	
+	
+	string m_particleSimulationName;
+	
     vector<double> mass;
     vector<double> volume;
     vector<double> density;
@@ -57,7 +61,10 @@ public:
     * SETTING THE PARTICLE STATE
     ****************************************************/
     void SetCube( const double particlesPerDirection, const double cubeLength, const Vector2d anchorPoint );
-    void SetDefaultParticles();
+    void SetRectangle(const double particlesInX, const double particlesInY, const double xLength, const double yLength , const Vector2d anchorPoint);
+	// void SetSnowball(const double h, const Vector2d& gridPosition);
+	// void Phi(const double x, const double y);
+	virtual void SetDefaultParticles() = 0;
     Vector2d GetInitialVelocity();
     void SetInitialVelocity(const Vector2d& v0);
     void InitializeParticles();
@@ -67,9 +74,11 @@ public:
     void InitializeParticleDensity();
     void InitializeDeformationGradients();
     void InitializeParticlePositions();
-    void InitializeParticleVelocities();
+    virtual void InitializeParticleVelocities() = 0;
 
     double GetNumberOfParticles();
+	
+	string GetParticleSimulationName();
 
     /****************************************************
     * UPDATING THE PARTICLE STATE
@@ -81,9 +90,8 @@ public:
     /****************************************************
     * PARTICLE COMPUTATIONS
     ****************************************************/
-
-    void ComputeVolumeDensity(  int N, double h, vector<double>& massGrid, vector<Vector2i>& massList, TOOLS Tools, INTERPOLATION Interpolation );
-    void ParticleCollision( double frictionCoeff );
+	void ComputeVolumeDensity(  int N, double h, vector<double>& massGrid, vector<Vector2i>& massList, TOOLS Tools, INTERPOLATION Interpolation );
+    virtual void ParticleCollision( double frictionCoeff ) = 0;
     void ComputePicFlipVelocities( int N, double h, vector<Vector2i>& massList, vector<VectorXd>& gridNodeWeights, vector<Vector2d>& velocityGrid, vector<Vector2d>& newVelocityGrid, TOOLS Tools, INTERPOLATION Interpolation );
 
 
@@ -95,6 +103,117 @@ public:
 
 
 };
+
+
+
+
+
+/////////////////////////////////////////////////////////////////
+//
+// CUBE TO CUBE COLLISION
+//
+//////////////////////////////////////////////////////////////////
+
+class CUBE_TO_CUBE_COLLISION: public PARTICLES {
+public:
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff );
+};
+
+
+
+/////////////////////////////////////////////////////////////////
+//
+// RECTANGLE FREE FALL with CYLINDER
+//
+//////////////////////////////////////////////////////////////////
+
+class RECTANGLE_FREEFALL_CYLINDER: public PARTICLES {
+public:
+	double LevelSet(const double x, const double y);
+	Vector2d GradientLevelSet(const double x, const double y);
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff ); 
+};
+
+/////////////////////////////////////////////////////////////////
+//
+// RECTANGLE FREE FALL with HAT OBSTACLE
+//
+//////////////////////////////////////////////////////////////////
+
+class RECTANGLE_FREEFALL_HAT_OBSTACLE: public PARTICLES {
+public:
+	double LevelSet(const double x, const double y);
+	Vector2d GradientLevelSet(const double x, const double y);
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff ); 
+};
+
+
+
+/////////////////////////////////////////////////////////////////
+//
+// CUBE FREE FALL with no OBSTACLE
+//
+//////////////////////////////////////////////////////////////////
+
+class CUBE_FREEFALL: public PARTICLES {
+public:
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff );
+};
+
+
+
+/////////////////////////////////////////////////////////////////
+//
+// CUBE CRASH INTO PADDED GROUND
+//
+//////////////////////////////////////////////////////////////////
+
+class CUBE_CRASH_PADDED_GROUND: public PARTICLES {
+public:
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff );
+};
+
+
+
+
+
+/////////////////////////////////////////////////////////////////
+//
+// CUBE CRASH INTO WALL
+//
+//////////////////////////////////////////////////////////////////
+
+class CUBE_CRASH_WALL: public PARTICLES {
+public:
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff );
+};
+
+
+/////////////////////////////////////////////////////////////////
+//
+// CUBE_TO_CUBE_FREEFALL
+//
+//////////////////////////////////////////////////////////////////
+
+class CUBE_TO_CUBE_FREEFALL: public PARTICLES {
+public:
+	void SetDefaultParticles();
+	void InitializeParticleVelocities();
+	void ParticleCollision( double frictionCoeff );
+};
+
 
 
 

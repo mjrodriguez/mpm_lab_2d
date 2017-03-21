@@ -310,72 +310,18 @@ void GRID::UpdateVelocityGrid(double timeStep) {
 
 
 
-void GRID::GridCollision( double frictionCoeff ) {
-    Vector2d collisionNormal;
-    Vector2d velocityCollision = Vector2d ( 0, 0);
-
-    for (int i = 0; i < massList.size(); i++){
-
-        bool hasItCollided = false;
-
-        int ig, jg;
-        ig = massList[i].x();
-        jg = massList[i].y();
-
-
-        // GROUND COLLISION
-        if ( position[Index2D(ig,jg)].y() <= (double) 0.1 ){
-            hasItCollided = true;
-            collisionNormal = Vector2d( 0, 1);
-        }
-        else if(position[Index2D(ig,jg)].x() <= (double) 0.1){
-            hasItCollided = true;
-            collisionNormal = Vector2d(1, 0);
-        }
-        else if( position[Index2D(ig,jg)].y() >= (double) 0.9){
-            hasItCollided = true;
-            collisionNormal = Vector2d(0, -1.0);
-        }
-        else if( position [Index2D(ig,jg)].x() >= (double) 0.9 ){
-            hasItCollided = true;
-            collisionNormal = Vector2d(-1.0, 0);
-        }
 
 
 
-        if ( hasItCollided ){
-
-            Vector2d velocityRel = velocity[Index2D(ig,jg)] - velocityCollision;
-
-            double normalVelocity = velocityRel.dot(collisionNormal);
-
-            if (normalVelocity < 0){
-
-                Vector2d tangentVelocity = velocityRel - collisionNormal*normalVelocity;
-                Vector2d velocityRelPrime;
-
-                if (tangentVelocity.norm() <= -frictionCoeff*normalVelocity ){
-                    velocityRelPrime = Vector2d (0, 0);
-                }
-                else{
-                    velocityRelPrime.x() = tangentVelocity.x() + frictionCoeff*normalVelocity*tangentVelocity.x()/tangentVelocity.norm();
-                    velocityRelPrime.y() = tangentVelocity.y() + frictionCoeff*normalVelocity*tangentVelocity.y()/tangentVelocity.norm();
-            }
-
-                velocity[ Index2D(ig,jg) ] = velocityRelPrime + velocityCollision;
-
-            } // if normalVelocity < 0
-
-        } // if hasItCollided
+///////////////////////////////////////////////////////////////////
+//
+// LEVEL SETS AND COLLISIONS
+//
+////////////////////////////////////////////////////////////////////
 
 
 
 
-        //            cout << "Grid Node ( " << ig << " , " <<  jg << " , " << kg << " ) = " <<  hasItCollided << endl;
-
-    } // for massList
-
-}
 
 
 
@@ -494,3 +440,289 @@ Matrix2d GRID::Clamp(Matrix2d &principalValues, double criticalStretch, double c
 
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//====================================================================================================//
+// GRID_NO_OBSTACLE
+//====================================================================================================//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+void GRID_NO_OBSTACLE::GridCollision( double frictionCoeff ) {
+    Vector2d collisionNormal;
+    Vector2d velocityCollision = Vector2d ( 0, 0);
+
+    for (int i = 0; i < massList.size(); i++){
+
+        bool hasItCollided = false;
+
+        int ig, jg;
+        ig = massList[i].x();
+        jg = massList[i].y();
+		
+		
+
+        // GROUND COLLISION
+        if ( position[Index2D(ig,jg)].y() <= (double) 0.05 ){
+            hasItCollided = true;
+            collisionNormal = Vector2d( 0, 1);
+        }
+        else if(position[Index2D(ig,jg)].x() <= (double) 0.05){
+            hasItCollided = true;
+            collisionNormal = Vector2d(1, 0);
+        }
+        else if( position[Index2D(ig,jg)].y() >= (double) 0.95){
+            hasItCollided = true;
+            collisionNormal = Vector2d(0, -1.0);
+        }
+        else if( position [Index2D(ig,jg)].x() >= (double) 0.95 ){
+            hasItCollided = true;
+            collisionNormal = Vector2d(-1.0, 0);
+        }
+
+
+
+        if ( hasItCollided ){
+
+            Vector2d velocityRel = velocity[Index2D(ig,jg)] - velocityCollision;
+
+            double normalVelocity = velocityRel.dot(collisionNormal);
+
+            if (normalVelocity < 0){
+
+                Vector2d tangentVelocity = velocityRel - collisionNormal*normalVelocity;
+                Vector2d velocityRelPrime;
+
+                if (tangentVelocity.norm() <= -frictionCoeff*normalVelocity ){
+                    velocityRelPrime = Vector2d (0, 0);
+                }
+                else{
+                    velocityRelPrime.x() = tangentVelocity.x() + frictionCoeff*normalVelocity*tangentVelocity.x()/tangentVelocity.norm();
+                    velocityRelPrime.y() = tangentVelocity.y() + frictionCoeff*normalVelocity*tangentVelocity.y()/tangentVelocity.norm();
+            }
+
+                velocity[ Index2D(ig,jg) ] = velocityRelPrime + velocityCollision;
+
+            } // if normalVelocity < 0
+
+        } // if hasItCollided
+
+
+
+
+        //            cout << "Grid Node ( " << ig << " , " <<  jg << " , " << kg << " ) = " <<  hasItCollided << endl;
+
+    } // for massList
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//====================================================================================================//
+// GRID_CYLINDER_OBSTACLE
+//====================================================================================================//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/// CYLINDER
+double GRID_CYLINDER_OBSTACLE::LevelSet(const double x, const double y){
+	return (x-0.5)*(x-0.5) + (y-0.5)*(y-0.5) - 0.1*0.1;
+}
+Vector2d GRID_CYLINDER_OBSTACLE::GradientLevelSet(const double x, const double y){
+	Vector2d v = Vector2d( 2*(x-0.5), 2*(y-0.5) );
+	return v/v.norm();
+}
+
+void GRID_CYLINDER_OBSTACLE::GridCollision( double frictionCoeff ) {
+    Vector2d collisionNormal;
+    Vector2d velocityCollision = Vector2d ( 0, 0);
+
+    for (int i = 0; i < massList.size(); i++){
+
+        bool hasItCollided = false;
+
+        int ig, jg;
+        ig = massList[i].x();
+        jg = massList[i].y();
+		
+		
+		
+		//////////////////////////////////////////
+		// COLLISION WITH CYLINDER
+		//////////////////////////////////////////
+		double phi = LevelSet( position[Index2D(ig,jg)].x(), position[Index2D(ig,jg)].y() );
+		if ( phi <= 0 ){
+			// cout << "Collision with Cylinder GRID" << endl;
+			hasItCollided = true;
+			collisionNormal = GradientLevelSet(position[Index2D(ig,jg)].x(), position[Index2D(ig,jg)].y());
+		}
+		
+
+        // GROUND COLLISION
+        if ( position[Index2D(ig,jg)].y() <= (double) 0.05 ){
+            hasItCollided = true;
+            collisionNormal = Vector2d( 0, 1);
+        }
+        else if(position[Index2D(ig,jg)].x() <= (double) 0.05){
+            hasItCollided = true;
+            collisionNormal = Vector2d(1, 0);
+        }
+        else if( position[Index2D(ig,jg)].y() >= (double) 0.95){
+            hasItCollided = true;
+            collisionNormal = Vector2d(0, -1.0);
+        }
+        else if( position [Index2D(ig,jg)].x() >= (double) 0.95 ){
+            hasItCollided = true;
+            collisionNormal = Vector2d(-1.0, 0);
+        }
+
+
+
+        if ( hasItCollided ){
+
+            Vector2d velocityRel = velocity[Index2D(ig,jg)] - velocityCollision;
+
+            double normalVelocity = velocityRel.dot(collisionNormal);
+
+            if (normalVelocity < 0){
+
+                Vector2d tangentVelocity = velocityRel - collisionNormal*normalVelocity;
+                Vector2d velocityRelPrime;
+
+                if (tangentVelocity.norm() <= -frictionCoeff*normalVelocity ){
+                    velocityRelPrime = Vector2d (0, 0);
+                }
+                else{
+                    velocityRelPrime.x() = tangentVelocity.x() + frictionCoeff*normalVelocity*tangentVelocity.x()/tangentVelocity.norm();
+                    velocityRelPrime.y() = tangentVelocity.y() + frictionCoeff*normalVelocity*tangentVelocity.y()/tangentVelocity.norm();
+            }
+
+                velocity[ Index2D(ig,jg) ] = velocityRelPrime + velocityCollision;
+
+            } // if normalVelocity < 0
+
+        } // if hasItCollided
+
+
+
+
+        //            cout << "Grid Node ( " << ig << " , " <<  jg << " , " << kg << " ) = " <<  hasItCollided << endl;
+
+    } // for massList
+
+}
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//====================================================================================================//
+// GRID_HAT_OBSTACLE
+//====================================================================================================//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+double GRID_HAT_OBSTACLE::LevelSet(const double x, const double y){
+	if (x >= 0.4 && x <= 0.6){
+		return 0.5 - fabs(x-0.5)-y;
+	}	
+	else{
+		return 1;
+	}
+}
+Vector2d GRID_HAT_OBSTACLE::GradientLevelSet(const double x, const double y){
+	Vector2d v;
+	if ( x >= 0.4 && x <= 0.5 ){
+		v = Vector2d( -1, 1 );
+	}
+	else if (x > 0.5 && x <= 0.6 ){
+		v = Vector2d( 1, 1 );
+	}
+	return v/v.norm();
+}
+
+void GRID_HAT_OBSTACLE::GridCollision( double frictionCoeff ) {
+    Vector2d collisionNormal;
+    Vector2d velocityCollision = Vector2d ( 0, 0);
+
+    for (int i = 0; i < massList.size(); i++){
+
+        bool hasItCollided = false;
+
+        int ig, jg;
+        ig = massList[i].x();
+        jg = massList[i].y();
+		
+		
+		
+		//////////////////////////////////////////
+		// COLLISION WITH CYLINDER
+		//////////////////////////////////////////
+		double phi = LevelSet( position[Index2D(ig,jg)].x(), position[Index2D(ig,jg)].y() );
+		if ( phi <= 0 ){
+			// cout << "Collision with Cylinder GRID" << endl;
+			hasItCollided = true;
+			collisionNormal = GradientLevelSet(position[Index2D(ig,jg)].x(), position[Index2D(ig,jg)].y());
+		}
+		
+
+        // GROUND COLLISION
+        if ( position[Index2D(ig,jg)].y() <= (double) 0.05 ){
+            hasItCollided = true;
+            collisionNormal = Vector2d( 0, 1);
+        }
+        else if(position[Index2D(ig,jg)].x() <= (double) 0.05){
+            hasItCollided = true;
+            collisionNormal = Vector2d(1, 0);
+        }
+        else if( position[Index2D(ig,jg)].y() >= (double) 0.95){
+            hasItCollided = true;
+            collisionNormal = Vector2d(0, -1.0);
+        }
+        else if( position [Index2D(ig,jg)].x() >= (double) 0.95 ){
+            hasItCollided = true;
+            collisionNormal = Vector2d(-1.0, 0);
+        }
+
+
+
+        if ( hasItCollided ){
+
+            Vector2d velocityRel = velocity[Index2D(ig,jg)] - velocityCollision;
+
+            double normalVelocity = velocityRel.dot(collisionNormal);
+
+            if (normalVelocity < 0){
+
+                Vector2d tangentVelocity = velocityRel - collisionNormal*normalVelocity;
+                Vector2d velocityRelPrime;
+
+                if (tangentVelocity.norm() <= -frictionCoeff*normalVelocity ){
+                    velocityRelPrime = Vector2d (0, 0);
+                }
+                else{
+                    velocityRelPrime.x() = tangentVelocity.x() + frictionCoeff*normalVelocity*tangentVelocity.x()/tangentVelocity.norm();
+                    velocityRelPrime.y() = tangentVelocity.y() + frictionCoeff*normalVelocity*tangentVelocity.y()/tangentVelocity.norm();
+            }
+
+                velocity[ Index2D(ig,jg) ] = velocityRelPrime + velocityCollision;
+
+            } // if normalVelocity < 0
+
+        } // if hasItCollided
+
+
+
+
+        //            cout << "Grid Node ( " << ig << " , " <<  jg << " , " << kg << " ) = " <<  hasItCollided << endl;
+
+    } // for massList
+
+}

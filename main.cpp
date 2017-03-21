@@ -21,28 +21,40 @@ int main() {
 
     ELASTOPLASTIC ConstitutiveModel;
     FILE_IO FileIO;
-    GRID Grid;
-    INTERPOLATION Interpolation;
-    PARTICLES Particle;
-    DEFAULT_PARAMETERS SimulationParams;
+	INTERPOLATION Interpolation;
+    
+	GRID_NO_OBSTACLE Grid;
+	// GRID_HAT_OBSTACLE Grid;
+	// GRID_CYLINDER_OBSTACLE Grid;
+	
+    // CUBE_TO_CUBE_FREEFALL Particle;
+   	// CUBE_CRASH_WALL Particle;
+	// CUBE_TO_CUBE_COLLISION Particle;
+     CUBE_CRASH_PADDED_GROUND Particle;
+	// RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
+	// RECTANGLE_FREEFALL_CYLINDER Particle;
+	
+	DEFAULT_PARAMETERS SimulationParams;
     // HYPERELASTICITY SimulationParams;
-	// SCALED_HYPERELASTICITY SimulationParams;
-	// SCALED_DEFAULT_PARAMETERS SimulationParams;
     // LOWER_CRITICAL_COMPRESSION_PARAMETERS SimulationParams;
+    // LOWER_CRITICAL_STRETCH_PARAMETERS SimulationParams;
+    // LOWER_HARDENING SimulationParams;
+    // LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS SimulationParams;\
+    // LOWER_YOUNGS_MODULUS SimulationParams;
     TOOLS Tools;
 
 
-    string directory = "/home/rodriguez/Documents/mpm_lab_node_4/output/";
+    string directory = "/home/rodriguez/Documents/mpm_lab_node_5/output/";
     // string directory = "/home/rodriguez/Documents/mpm_lab_node_9/output/";
     // string directory = "/Users/Martin/Documents/College/Research/Professor Blomgren/Thesis/mpm_lab";
 
     SimulationParams.SetDefaultParameters();
-    SimulationParams.SetDt(5e-5);
-    Particle.SetInitialVelocity(Vector2d(0.0,-1.0));
     Particle.SetDefaultParticles();
     Grid.SetDefaultGrid();
+	double timeToFrame = SimulationParams.GetTimeToFrame();
+	SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
 
-    cout << "Run this simulation? " << SimulationParams.GetSimulationName() << endl;
+    cout << "Run this simulation? " << SimulationParams.GetSimulationName() << "_"+Particle.GetParticleSimulationName()  << endl;
     cout << "Save to this directory? " << directory << endl;
     cin.get();
 
@@ -59,6 +71,7 @@ int main() {
     vector<double> timeStep;
     timeStep.push_back(SimulationParams.GetDt());
 	
+	
     // WRITING INITIAL CONDITIONS
     FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
 	
@@ -67,8 +80,9 @@ int main() {
     while (currentTime <= SimulationParams.GetFinalTime()  ){
         clock_t begin = clock();
 
-        cout << "---------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
-        cout << "Simulation = " << SimulationParams.GetSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() << " | Current Time Step Size: " << SimulationParams.GetDt() << " | " << "Current Time: " << currentTime << " | Current Iteration: " << iterationCounter << " | Current Frame: " << frameNumber <<  endl;
+        cout << "-------------------------------------------------------------------------------------------------------------------------------" << endl;
+        cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() << " | Current Time Step Size: " << SimulationParams.GetDt() << endl; 
+		cout << "Current Time: " << currentTime << " | Current Iteration: " << iterationCounter << " | Current Frame: " << frameNumber <<  endl;
         cout << "Saving Directory = " << directory << endl;
 
         iterationCounter += 1;
@@ -109,39 +123,31 @@ int main() {
 		Particle.UpdateParticlePosition(SimulationParams.GetDt());
 
         cout << "Max Velocity = " << Tools.MaxNormValue(Particle.velocity) << endl;
-        cout << "Cube 1 = " << Particle.position[Particle.GetNumberOfParticles()/4].transpose() << endl;
-		cout << "Cube 2 = " << Particle.position[3*Particle.GetNumberOfParticles()/4].transpose() << endl;
+        cout << "First Particle  = " << Particle.position[0].transpose() << endl;
+		// cout << "Cube 2 = " << Particle.position[3*Particle.GetNumberOfParticles()/4].transpose() << endl;
 		
-        if ( iterationCounter % 500 == 0){
-        //if (1 == 0){
-            frameNumber += 1;
+		if ( timeToFrame == 0){
+			frameNumber += 1;
 
-            // WRITING OUTPUT
-            FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
-
-
-
-//			// COMPUTING DISTANCE TRAVELED OF PARTICLE
-//			distanceTraveled = Particle.position.back() - oldPosition;
-//			oldPosition = Particle.position.back();
-//			cout << "Distance Traveled.norm() = " << distanceTraveled.norm() << endl;
-
-            // cin.get();
-        }
+			// WRITING OUTPUT
+			FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
+			timeToFrame = SimulationParams.GetTimeToFrame();
+		}
 
         Grid.ClearEulerianFields();
 
         currentTime += SimulationParams.GetDt();
-
-        //SimulationParams.SetDt(Grid.GetGridSpacing(), Particle.velocity );
+		timeToFrame -= SimulationParams.GetDt();
+		
+        SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
         timeStep.push_back(SimulationParams.GetDt());
 
         clock_t end = clock();
         timePerIteration.push_back( double(end - begin)/CLOCKS_PER_SEC );
         double iterationTimeDisplay = double(end - begin)/CLOCKS_PER_SEC;
         cout << "Time per Iteration = " << iterationTimeDisplay << " seconds" << endl;
-
-
+		cout << "Time to Frame = " << timeToFrame << " seconds" << endl;
+		
     }
 
     clock_t end_sim = clock();

@@ -17,7 +17,7 @@ using namespace Eigen;
 
 class GRID{
 
-private:
+public:
 
     int m_nx;
     int m_ny;
@@ -29,8 +29,8 @@ private:
 
     // EQUAL GRID SPACING IN ALL DIRECTIONS
     double m_h;
-
-public:
+	
+	
 
     /***********************************************************************************************************************
     *
@@ -113,10 +113,12 @@ public:
 
     void UpdateVelocityGrid(double timeStep);
 
-    void GridCollision(double frictionCoeff);
+	////////////////////////////////////////////////////////
+	// LEVEL SETS and COLLISIONS
+	/////////////////////////////////////////////////////////
+	virtual void GridCollision(double frictionCoeff) = 0;
 
-    void
-    UpdateDeformationGradient(bool usePlasticity, double timeStep, double criticalStretch, double criticalCompression,
+    void UpdateDeformationGradient(bool usePlasticity, double timeStep, double criticalStretch, double criticalCompression,
                               vector<double> &JElastic,
                               vector<double> &JPlastic, vector<Vector2d> &positionParticle,
                               vector<Matrix2d> &elasticDeformationGradient,
@@ -128,5 +130,27 @@ public:
     Matrix2d Clamp(Matrix2d &principalValues, double criticalStretch, double criticalCompression);
 
 };
+
+
+class GRID_NO_OBSTACLE: public GRID {
+public:
+	void GridCollision(double frictionCoeff);
+};
+
+class GRID_CYLINDER_OBSTACLE: public GRID{
+public:
+	double LevelSet(const double x, const double y);
+	Vector2d GradientLevelSet(const double x, const double y);
+	void GridCollision(double frictionCoeff);
+};
+
+
+class GRID_HAT_OBSTACLE: public GRID{
+public:
+	double LevelSet(const double x, const double y);
+	Vector2d GradientLevelSet(const double x, const double y);
+	void GridCollision(double frictionCoeff);
+};
+
 
 #endif //MPM_LAB_2D_GRID_H

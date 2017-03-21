@@ -21,6 +21,7 @@ class SIMULATION_PARAMETERS{
 protected:
     double m_dt;
     double m_finalTime;
+	double m_timeToFrame;
     double m_alpha;  // Grid to Particle Velocity Transfer PIC/FLIP
 
     double m_beta; // Explicit Integration = 0
@@ -54,13 +55,14 @@ public:
 
     virtual void SetDefaultParameters() = 0;
     void SetDt(double timeStep);
-    void SetDt(double h, vector<Vector3d>& particleVelocity);
+    void SetDt(const double h, const double timeToFrame, const vector<Vector2d>& particleVelocity);
     void SetSimulationName(string simulationName);
 
     /////////////////////////////////////////////////////
     // FUNCTIONS TO GET PARAMETERS
     ////////////////////////////////////////////////////
     double GetDt();
+	double GetTimeToFrame();
     double GetFinalTime();
     double GetAlpha();
     double GetBeta();
@@ -90,7 +92,36 @@ public:
 
 };
 
+//////////////////////////////////////////////////////////////////////
+// LOWER_YOUNGS_MODULUS [FROM MPM PAPER]
+//////////////////////////////////////////////////////////////////////
 
+class LOWER_YOUNGS_MODULUS: public SIMULATION_PARAMETERS {
+public:
+    void SetDefaultParameters();
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+// LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS [FROM MPM PAPER]
+//////////////////////////////////////////////////////////////////////
+
+class LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS: public SIMULATION_PARAMETERS {
+public:
+    void SetDefaultParameters();
+
+};
+
+//////////////////////////////////////////////////////////////////////
+// LOWER_HARDENING [FROM MPM PAPER]
+//////////////////////////////////////////////////////////////////////
+
+class LOWER_HARDENING: public SIMULATION_PARAMETERS {
+public:
+    void SetDefaultParameters();
+
+};
 
 
 

@@ -61,9 +61,10 @@ double INTERPOLATION::Weight(const double h, Vector3d &particlePosition, const d
 
 Vector3d INTERPOLATION::GradientWeight(const double h, Vector3d &particlePosition, const double i, const double j, const double k) {
     Vector3d DW;
-    DW[0] = GradientN( (particlePosition.x()-i*h)/h ) * N( (particlePosition.y()-j*h)/h ) * N( (particlePosition.z()-k*h)/h );
-    DW[1] = N( (particlePosition.x()-i*h)/h ) * GradientN( (particlePosition.y()-j*h)/h ) * N( (particlePosition.z()-k*h)/h );
-    DW[2] = N( (particlePosition.x()-i*h)/h ) * N( (particlePosition.y()-j*h)/h ) * GradientN( (particlePosition.z()-k*h)/h );
+	double one_over_h = 1/h;
+    DW[0] = one_over_h*GradientN( (particlePosition.x()-i*h)/h ) * N( (particlePosition.y()-j*h)/h ) * N( (particlePosition.z()-k*h)/h );
+    DW[1] = one_over_h*N( (particlePosition.x()-i*h)/h ) * GradientN( (particlePosition.y()-j*h)/h ) * N( (particlePosition.z()-k*h)/h );
+    DW[2] = one_over_h*N( (particlePosition.x()-i*h)/h ) * N( (particlePosition.y()-j*h)/h ) * GradientN( (particlePosition.z()-k*h)/h );
 
     return DW;
 
@@ -94,8 +95,9 @@ double INTERPOLATION::Weight(const double h, const Vector2d& particlePosition, c
 
 Vector2d INTERPOLATION::GradientWeight( const double h, const Vector2d &particlePosition, const double i, const double j){
     Vector2d DW;
-    DW[0] = GradientN( (particlePosition.x()-i*h)/h ) * N( (particlePosition.y()-j*h)/h ) ;
-    DW[1] = N( (particlePosition.x()-i*h)/h ) * GradientN( (particlePosition.y()-j*h)/h ) ;
+	double one_over_h = 1/h;
+    DW[0] = one_over_h*GradientN( (particlePosition.x()-i*h)/h ) * N( (particlePosition.y()-j*h)/h ) ;
+    DW[1] = one_over_h*N( (particlePosition.x()-i*h)/h ) * GradientN( (particlePosition.y()-j*h)/h ) ;
 
     return DW;
 }
