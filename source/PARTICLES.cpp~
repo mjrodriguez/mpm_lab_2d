@@ -416,8 +416,8 @@ void RECTANGLE_FREEFALL_CYLINDER::SetDefaultParticles() {
     SetCube( 20, 0.2, anchor2 );
 	*/
 	
-    Vector2d anchor1(0.3,0.75);
-    SetRectangle( 50, 25, 0.4, 0.2, anchor1 );
+    Vector2d anchor1(0.25,0.75);
+    SetRectangle( 60, 30, 0.5, 0.25, anchor1 );
 	
 
     InitializeParticles();
@@ -523,10 +523,10 @@ double RECTANGLE_FREEFALL_HAT_OBSTACLE::LevelSet(const double x, const double y)
 }
 Vector2d RECTANGLE_FREEFALL_HAT_OBSTACLE::GradientLevelSet(const double x, const double y){
 	Vector2d v;
-	if ( x >= 0.4 && x <= 0.5 && y >= 0.5 && y <= 0.6 ){
+	if ( x >= 0.4 && x <= 0.5 && y >= 0.4 && y <= 0.5 ){
 		v = Vector2d( -1, 1 );
 	}
-	else if ( x > 0.5 && x <= 0.6 && y >= 0.5 && y <= 0.6 ){
+	else if ( x > 0.5 && x <= 0.6 && y >= 0.4 && y <= 0.5 ){
 		v = Vector2d( 1, 1 );
 	}
 	return v/v.norm();

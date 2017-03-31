@@ -42,7 +42,7 @@ void FILE_IO::WriteSimulationParameters(string directory, PARTICLES& Particles, 
 
     assert(fileout.is_open());
 
-    fileout << "Name of Simulation = " << SimulationParameters.GetSimulationName() << ", " << Particles.GetParticleSimulationName() << endl;
+    fileout << "Name of Simulation = " << SimulationParameters.GetSimulationName() << "_" << Particles.GetParticleSimulationName() << endl;
     fileout << "Initial Velocity (Particles) = " << Particles.GetInitialVelocity().transpose() << endl;
 	fileout << "Number of Particles = " << Particles.GetNumberOfParticles() << endl;
     fileout << "Grid size = " << Grid.GetN() << endl;

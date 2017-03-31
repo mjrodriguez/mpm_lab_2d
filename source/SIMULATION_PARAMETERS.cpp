@@ -145,7 +145,7 @@ bool SIMULATION_PARAMETERS::SolveImplicit() {
 
 void DEFAULT_PARAMETERS::SetDefaultParameters() {
     m_dt = 0.0001;
-    m_finalTime = 2.0;
+    m_finalTime = 2.5;
 	m_timeToFrame = 1.0/60.0;
 
     m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
@@ -155,13 +155,13 @@ void DEFAULT_PARAMETERS::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.6;
+    m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 2.5e-2;
     m_criticalStretch = 7.5e-3;
     m_hardeningCoeff = 10;
-    m_initialDensity = 4.0e+2;
+    m_initialDensity = 1.0e+2;
     m_youngsMod = 1.4e+5;
 	// m_youngsMod = 2;
     m_poissonRatio = 0.2;
@@ -174,7 +174,7 @@ void DEFAULT_PARAMETERS::SetDefaultParameters() {
 
     m_CFL = 0.6;
 
-    m_name = string("Default");
+    m_name = string("default");
 
 
     gravity = Vector2d (0,-9.8);
@@ -198,7 +198,7 @@ void DEFAULT_PARAMETERS::SetDefaultParameters() {
 
 void LOWER_YOUNGS_MODULUS::SetDefaultParameters() {
     m_dt = 0.0001;
-    m_finalTime = 2.00;
+    m_finalTime = 2.50;
 	m_timeToFrame = 1.0/60.0;
 
     m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
@@ -208,13 +208,13 @@ void LOWER_YOUNGS_MODULUS::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.6;
+    m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 2.5e-2;
     m_criticalStretch = 7.5e-3;
     m_hardeningCoeff = 10;
-    m_initialDensity = 4.0e+2;
+    m_initialDensity = 1.0e+2;
     m_youngsMod = 4.8e+4;
 	// m_youngsMod = 2;
     m_poissonRatio = 0.2;
@@ -227,7 +227,7 @@ void LOWER_YOUNGS_MODULUS::SetDefaultParameters() {
 
     m_CFL = 0.1;
 
-    m_name = string("Lower_Youngs_Modulus");
+    m_name = string("lower_youngs_modulus");
 
 
     gravity = Vector2d (0,-9.8);
@@ -252,7 +252,7 @@ void LOWER_YOUNGS_MODULUS::SetDefaultParameters() {
 
 void LOWER_HARDENING::SetDefaultParameters() {
     m_dt = 0.0001;
-    m_finalTime = 2.00;
+    m_finalTime = 2.50;
 	m_timeToFrame = 1.0/60.0;
     
 	m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
@@ -262,13 +262,13 @@ void LOWER_HARDENING::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.6;
+    m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 2.5e-2;
     m_criticalStretch = 7.5e-3;
     m_hardeningCoeff = 5;
-    m_initialDensity = 4.0e+2;
+   m_initialDensity = 1.0e+2;
     m_youngsMod = 1.4e+5;
 	// m_youngsMod = 2;
     m_poissonRatio = 0.2;
@@ -281,7 +281,7 @@ void LOWER_HARDENING::SetDefaultParameters() {
 
     m_CFL = 0.1;
 
-    m_name = string("Lower_Hardening");
+    m_name = string("lower_hardening");
 
 
     gravity = Vector2d (0,-9.8);
@@ -311,7 +311,7 @@ void LOWER_HARDENING::SetDefaultParameters() {
 
 void LOWER_CRITICAL_COMPRESSION_PARAMETERS::SetDefaultParameters() {
     m_dt = 0.0001;
-    m_finalTime = 2.0;
+    m_finalTime = 2.5;
 	m_timeToFrame = 1.0/60.0;
 	
     m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
@@ -321,13 +321,13 @@ void LOWER_CRITICAL_COMPRESSION_PARAMETERS::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.6;
+    m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 1.9e-2;
     m_criticalStretch = 7.5e-3;
     m_hardeningCoeff = 10;
-    m_initialDensity = 4.0e+2;
+    m_initialDensity = 1.0e+2;
     m_youngsMod = 1.4e+5;
     m_poissonRatio = 0.2;
 
@@ -339,7 +339,7 @@ void LOWER_CRITICAL_COMPRESSION_PARAMETERS::SetDefaultParameters() {
 
     m_CFL = 0.1;
 
-    m_name = string("Lower_Critical_Compression");
+    m_name = string("lower_critical_compression");
 
     gravity = Vector2d (0,-9.8);
     usePlasticity = true;
@@ -366,7 +366,7 @@ void LOWER_CRITICAL_COMPRESSION_PARAMETERS::SetDefaultParameters() {
 
 void LOWER_CRITICAL_STRETCH_PARAMETERS::SetDefaultParameters() {
     m_dt = 0.0001;
-    m_finalTime = 2.0;
+    m_finalTime = 2.5;
 	m_timeToFrame = 1.0/60.0;
 
     m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
@@ -376,13 +376,13 @@ void LOWER_CRITICAL_STRETCH_PARAMETERS::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.6;
+   	m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 2.5e-2;
     m_criticalStretch = 5.0e-3;
     m_hardeningCoeff = 10;
-    m_initialDensity = 4.0e+2;
+    m_initialDensity = 1.0e+2;
     m_youngsMod = 1.4e+5;
     m_poissonRatio = 0.2;
 
@@ -394,7 +394,7 @@ void LOWER_CRITICAL_STRETCH_PARAMETERS::SetDefaultParameters() {
 
     m_CFL = 0.1;
 
-    m_name = string("Lower_Critical_Stretch");
+    m_name = string("lower_critical_stretch");
 
     gravity = Vector2d (0,-9.8);
     usePlasticity = true;
@@ -414,7 +414,7 @@ void LOWER_CRITICAL_STRETCH_PARAMETERS::SetDefaultParameters() {
 
 void LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS::SetDefaultParameters() {
     m_dt = 0.0001;
-    m_finalTime = 2.00;
+    m_finalTime = 2.50;
 	m_timeToFrame = 1.0/60.0;
 	
     m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
@@ -424,13 +424,13 @@ void LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.6;
+    m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 1.9e-2;
     m_criticalStretch = 5.0e-3;
     m_hardeningCoeff = 10;
-    m_initialDensity = 4.0e+2;
+    m_initialDensity = 1.0e+2;
     m_youngsMod = 1.4e+5;
 	// m_youngsMod = 2;
     m_poissonRatio = 0.2;
@@ -443,7 +443,7 @@ void LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS::SetDefaultParameters() {
 
     m_CFL = 0.1;
 
-    m_name = string("Lower_Critical_Compression_Stretch");
+    m_name = string("lower_critical_compression_stretch");
 
 
     gravity = Vector2d (0,-9.8);
@@ -479,15 +479,15 @@ void HYPERELASTICITY::SetDefaultParameters() {
     // Implicit Integration = 1
 
 
-    m_frictionCoeff = 0.2;
+    m_frictionCoeff = 0.7;
 
     // Material Coefficients
     m_criticalCompression = 1.9e-2;
     m_criticalStretch = 7.5e-3;
     m_hardeningCoeff = 10;
-    m_initialDensity = 4.0e+2;
-    m_youngsMod = 2.4e+5;
-    m_poissonRatio = 0.3;
+    m_initialDensity = 1.0e+2;
+    m_youngsMod = 4.0e+4;
+    m_poissonRatio = 0.2;
 
     // Initial Lame Parameters
     m_lambda0 = m_youngsMod*m_poissonRatio/( ( 1+m_poissonRatio)*(1 - 2*m_poissonRatio) );
@@ -497,7 +497,7 @@ void HYPERELASTICITY::SetDefaultParameters() {
 
     m_CFL = 0.1;
 
-    m_name = string("Hyperelastic");
+    m_name = string("hyperelastic");
     gravity = Vector2d (0,-9.8);
 
     usePlasticity = false;

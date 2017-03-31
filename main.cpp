@@ -23,15 +23,15 @@ int main() {
     FILE_IO FileIO;
 	INTERPOLATION Interpolation;
     
-	GRID_NO_OBSTACLE Grid;
-	// GRID_HAT_OBSTACLE Grid;
+	// GRID_NO_OBSTACLE Grid;
+	GRID_HAT_OBSTACLE Grid;
 	// GRID_CYLINDER_OBSTACLE Grid;
 	
     // CUBE_TO_CUBE_FREEFALL Particle;
    	// CUBE_CRASH_WALL Particle;
 	// CUBE_TO_CUBE_COLLISION Particle;
-     CUBE_CRASH_PADDED_GROUND Particle;
-	// RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
+    // CUBE_CRASH_PADDED_GROUND Particle;
+	RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
 	// RECTANGLE_FREEFALL_CYLINDER Particle;
 	
 	DEFAULT_PARAMETERS SimulationParams;
@@ -39,22 +39,27 @@ int main() {
     // LOWER_CRITICAL_COMPRESSION_PARAMETERS SimulationParams;
     // LOWER_CRITICAL_STRETCH_PARAMETERS SimulationParams;
     // LOWER_HARDENING SimulationParams;
-    // LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS SimulationParams;\
+    // LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS SimulationParams;
     // LOWER_YOUNGS_MODULUS SimulationParams;
     TOOLS Tools;
 
 
+	string simulationNumber = "simulation_125";
     string directory = "/home/rodriguez/Documents/mpm_lab_node_5/output/";
     // string directory = "/home/rodriguez/Documents/mpm_lab_node_9/output/";
     // string directory = "/Users/Martin/Documents/College/Research/Professor Blomgren/Thesis/mpm_lab";
 
     SimulationParams.SetDefaultParameters();
+	Particle.SetInitialDensity(SimulationParams.GetInitialDensity());
     Particle.SetDefaultParticles();
     Grid.SetDefaultGrid();
 	double timeToFrame = SimulationParams.GetTimeToFrame();
 	SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
-
-    cout << "Run this simulation? " << SimulationParams.GetSimulationName() << "_"+Particle.GetParticleSimulationName()  << endl;
+	
+	
+	SimulationParams.SetSimulationName(simulationNumber + "_" + SimulationParams.GetSimulationName());
+		
+    cout << "Run this simulation? " << SimulationParams.GetSimulationName() << "_"+Particle.GetParticleSimulationName() << endl;
     cout << "Save to this directory? " << directory << endl;
     cin.get();
 
@@ -105,10 +110,19 @@ int main() {
         cout << "Min Force from Internal Stress = " << Tools.MinNormValue(Grid.force) << endl;
 
         Grid.AddGravityForce(SimulationParams.gravity);
+		
+		//////////////////////////////////////////////////////////////////
+		// COMPUTE newVelocity from velocity
+		/////////////////////////////////////////////////////////////////
         Grid.UpdateVelocityGrid(SimulationParams.GetDt());
-
+		
+		/////////////////////////////////////////////////////////////////////////
+		// EVERYTHING IS UPDATED WITH newVelocity (not velocity)
+		/////////////////////////////////////////////////////////////////////////
 
         Grid.GridCollision(SimulationParams.GetFrictionCoeff());
+		
+
         Grid.UpdateDeformationGradient(SimulationParams.usePlasticity, SimulationParams.GetDt(), SimulationParams.GetCriticalStretch(),
                                        SimulationParams.GetCriticalCompression(), Particle.JElastic, Particle.JPlastic,
                                        Particle.position, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient, Particle.deformationGradient, Interpolation);
@@ -126,6 +140,8 @@ int main() {
         cout << "First Particle  = " << Particle.position[0].transpose() << endl;
 		// cout << "Cube 2 = " << Particle.position[3*Particle.GetNumberOfParticles()/4].transpose() << endl;
 		
+		timeToFrame -= SimulationParams.GetDt();
+		
 		if ( timeToFrame == 0){
 			frameNumber += 1;
 
@@ -137,7 +153,7 @@ int main() {
         Grid.ClearEulerianFields();
 
         currentTime += SimulationParams.GetDt();
-		timeToFrame -= SimulationParams.GetDt();
+		
 		
         SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
         timeStep.push_back(SimulationParams.GetDt());

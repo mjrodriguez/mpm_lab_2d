@@ -24,6 +24,7 @@ public:
 	double m_area;
     double m_numberOfParticles;
     double m_particleGridSpacing;
+	double m_initialDensity;
     Vector2d m_initialVelocity;
     Vector2d m_anchorPoint;
 	
@@ -60,6 +61,8 @@ public:
     /****************************************************
     * SETTING THE PARTICLE STATE
     ****************************************************/
+	void SetInitialDensity(const double density);
+	
     void SetCube( const double particlesPerDirection, const double cubeLength, const Vector2d anchorPoint );
     void SetRectangle(const double particlesInX, const double particlesInY, const double xLength, const double yLength , const Vector2d anchorPoint);
 	// void SetSnowball(const double h, const Vector2d& gridPosition);
