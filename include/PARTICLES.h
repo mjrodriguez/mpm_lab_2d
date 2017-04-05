@@ -38,7 +38,8 @@ public:
     vector<double> JElastic; // Jacobian of Elastic Deformation Gradient
     vector<double> JPlastic; // Jacobian of Plastic Deformaiton Gradient
 
-
+	bool stickyCollision;
+	
     //////////////////////////////////////////////////////////////
     // 2D variables
     /////////////////////////////////////////////////////////////

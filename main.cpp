@@ -34,7 +34,8 @@ int main() {
 	RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
 	// RECTANGLE_FREEFALL_CYLINDER Particle;
 	
-	DEFAULT_PARAMETERS SimulationParams;
+	// DEFAULT_PARAMETERS SimulationParams;
+	DEFAULT_IMPLICIT_PARAMETERS SimulationParams;
     // HYPERELASTICITY SimulationParams;
     // LOWER_CRITICAL_COMPRESSION_PARAMETERS SimulationParams;
     // LOWER_CRITICAL_STRETCH_PARAMETERS SimulationParams;
@@ -44,7 +45,7 @@ int main() {
     TOOLS Tools;
 
 
-	string simulationNumber = "simulation_125";
+	string simulationNumber = "simulation_140";
     string directory = "/home/rodriguez/Documents/mpm_lab_node_5/output/";
     // string directory = "/home/rodriguez/Documents/mpm_lab_node_9/output/";
     // string directory = "/Users/Martin/Documents/College/Research/Professor Blomgren/Thesis/mpm_lab";
@@ -54,7 +55,7 @@ int main() {
     Particle.SetDefaultParticles();
     Grid.SetDefaultGrid();
 	double timeToFrame = SimulationParams.GetTimeToFrame();
-	SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
+	SimulationParams.SetDt( 1.0/60.0 * 1.0/4.0 );
 	
 	
 	SimulationParams.SetSimulationName(simulationNumber + "_" + SimulationParams.GetSimulationName());
@@ -66,7 +67,7 @@ int main() {
     ///////////////////////////////////////
     // SAVE SIMULATION PARAMETERS
     ////////////////////////////////////////
-    FileIO.WriteSimulationParameters(directory, Particle, Grid, SimulationParams);
+    // FileIO.WriteSimulationParameters(directory, Particle, Grid, SimulationParams);
 
 
     double currentTime = 0;
@@ -78,7 +79,7 @@ int main() {
 	
 	
     // WRITING INITIAL CONDITIONS
-    FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
+    // FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
 	
     clock_t begin_sim = clock();
 
@@ -109,12 +110,18 @@ int main() {
         cout << "Max Force from Internal Stress = " << Tools.MaxNormValue(Grid.force) << endl;
         cout << "Min Force from Internal Stress = " << Tools.MinNormValue(Grid.force) << endl;
 
-        Grid.AddGravityForce(SimulationParams.gravity);
+        
 		
 		//////////////////////////////////////////////////////////////////
 		// COMPUTE newVelocity from velocity
 		/////////////////////////////////////////////////////////////////
         Grid.UpdateVelocityGrid(SimulationParams.GetDt());
+		if ( SimulationParams.GetBeta() > 0 ){
+			Grid.ImplicitUpdateVelocityGrid(SimulationParams.usePlasticity, SimulationParams.GetBeta(), SimulationParams.GetDt(), SimulationParams.GetMu(), SimulationParams.GetLambda(),  SimulationParams.GetHardeningCoeff(), Particle.JElastic, Particle.JPlastic, Particle.volume, Particle.position, Particle.elasticDeformationGradient, Particle.R, Particle.S, Interpolation, ConstitutiveModel     );
+		}
+		
+		
+		// Grid.AddGravityForce(SimulationParams.gravity);
 		
 		/////////////////////////////////////////////////////////////////////////
 		// EVERYTHING IS UPDATED WITH newVelocity (not velocity)
@@ -142,7 +149,7 @@ int main() {
 		
 		timeToFrame -= SimulationParams.GetDt();
 		
-		if ( timeToFrame == 0){
+		if ( timeToFrame == 0 ){
 			frameNumber += 1;
 
 			// WRITING OUTPUT
@@ -154,8 +161,13 @@ int main() {
 
         currentTime += SimulationParams.GetDt();
 		
+		if (SimulationParams.GetDt() > timeToFrame){
+			SimulationParams.SetDt( timeToFrame );
+		}
 		
-        SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
+		
+		// CFL SET DT
+        // SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
         timeStep.push_back(SimulationParams.GetDt());
 
         clock_t end = clock();
@@ -176,6 +188,7 @@ int main() {
 
     FileIO.WriteTimeStep(directory, SimulationParams.GetSimulationName(), timeStep);
     FileIO.WriteTimePerIteration(directory, SimulationParams.GetSimulationName(), timePerIteration);
+	
 
 
     // std::cout << "Hello, World!" << std::endl;

@@ -50,9 +50,9 @@ void SIMULATION_PARAMETERS::SetDt(const double h, const double timeToFrame, cons
     }
     else {
         m_dt = m_CFL*h/maxVp;
-		if (m_dt > 1e-4){
-			m_dt = 1e-4;
-		}
+		// if (m_dt > 1e-4){
+		// 	m_dt = 1e-3;
+		// }
 		if (m_dt > timeToFrame){
 			m_dt = timeToFrame;
 		}
@@ -184,6 +184,47 @@ void DEFAULT_PARAMETERS::SetDefaultParameters() {
 }
 
 
+void DEFAULT_IMPLICIT_PARAMETERS::SetDefaultParameters() {
+    m_dt = 0.0001;
+    m_finalTime = 2.5;
+	m_timeToFrame = 1.0/60.0;
+
+    m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
+
+    m_beta = 1; // Explicit Integration = 0
+    // Trapezoidal Integration = 1/2
+    // Implicit Integration = 1
+
+
+    m_frictionCoeff = 0.7;
+
+    // Material Coefficients
+    m_criticalCompression = 2.5e-2;
+    m_criticalStretch = 7.5e-3;
+    m_hardeningCoeff = 10;
+    m_initialDensity = 1.0e+2;
+    m_youngsMod = 1.4e+5;
+	// m_youngsMod = 2;
+    m_poissonRatio = 0.2;
+
+    // Initial Lame Parameters
+    m_lambda0 = m_youngsMod*m_poissonRatio/( ( 1+m_poissonRatio)*(1 - 2*m_poissonRatio) );
+    m_mu0 = m_youngsMod/( 2*(1 + m_poissonRatio) );
+    m_implicitSolve = true;
+
+
+    m_CFL = 0.6;
+
+    m_name = string("default_implicit");
+
+
+    gravity = Vector2d (0,-9.8);
+    usePlasticity = true;
+
+
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -237,6 +278,50 @@ void LOWER_YOUNGS_MODULUS::SetDefaultParameters() {
 }
 
 
+
+
+
+
+
+void LOWER_YOUNGS_MODULUS_IMPLICIT::SetDefaultParameters() {
+    m_dt = 0.0001;
+    m_finalTime = 2.50;
+	m_timeToFrame = 1.0/60.0;
+
+    m_alpha = 0.95; // Grid to Particle Velocity Transfer PIC/FLIP
+
+    m_beta = 1; // Explicit Integration = 0
+    // Trapezoidal Integration = 1/2
+    // Implicit Integration = 1
+
+
+    m_frictionCoeff = 0.7;
+
+    // Material Coefficients
+    m_criticalCompression = 2.5e-2;
+    m_criticalStretch = 7.5e-3;
+    m_hardeningCoeff = 10;
+    m_initialDensity = 1.0e+2;
+    m_youngsMod = 4.8e+4;
+	// m_youngsMod = 2;
+    m_poissonRatio = 0.2;
+
+    // Initial Lame Parameters
+    m_lambda0 = m_youngsMod*m_poissonRatio/( ( 1+m_poissonRatio)*(1 - 2*m_poissonRatio) );
+    m_mu0 = m_youngsMod/( 2*(1 + m_poissonRatio) );
+    m_implicitSolve = true;
+
+
+    m_CFL = 0.1;
+
+    m_name = string("lower_youngs_modulus_implicit");
+
+
+    gravity = Vector2d (0,-9.8);
+    usePlasticity = true;
+
+
+}
 
 
 ///////////////////////////////////////////////////////////////////////

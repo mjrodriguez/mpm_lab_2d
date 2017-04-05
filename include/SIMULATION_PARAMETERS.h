@@ -92,6 +92,12 @@ public:
 
 };
 
+class DEFAULT_IMPLICIT_PARAMETERS: public SIMULATION_PARAMETERS {
+public:
+    void SetDefaultParameters();
+
+};
+
 //////////////////////////////////////////////////////////////////////
 // LOWER_YOUNGS_MODULUS [FROM MPM PAPER]
 //////////////////////////////////////////////////////////////////////
@@ -102,6 +108,11 @@ public:
 
 };
 
+class LOWER_YOUNGS_MODULUS_IMPLICIT: public SIMULATION_PARAMETERS {
+public:
+    void SetDefaultParameters();
+
+};
 
 //////////////////////////////////////////////////////////////////////
 // LOWER_CRITICAL_COMPRESSION_STRETCH_PARAMETERS [FROM MPM PAPER]

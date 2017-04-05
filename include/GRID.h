@@ -138,16 +138,23 @@ public:
 	
 	
 	void ImplicitUpdateVelocityGrid(const bool usePlasticity, const double beta, const double dt, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<double>& particleVolume, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& FE, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
-	vector<Vector2d> ComputeHessianAction(const bool usePlasticity, const double beta, const double dt, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<double>& particleVolume, const vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& FE, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
-	vector<Matrix2d> ComputeAp(const double timeStep, const bool usePlasticity, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<Vector2d>& positionParticle, const vector<Vector2d>& u, const vector<Matrix2d>& F, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
+	void ConjugateResidual(const bool usePlasticity, const double beta, const double dt, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<double>& particleVolume, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& FE, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
+	vector<Vector2d> ComputeHessianAction(const bool usePlasticity, const double beta, const double dt, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<double>& particleVolume, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& FE, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
+	vector<Matrix2d> ComputeAp(const double timeStep, const bool usePlasticity, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<Vector2d>& positionParticle, vector<Vector2d>& u, const vector<Matrix2d>& F, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
 	vector<Vector2d> ComputeDeltaForce(const vector<double>& particleVolume, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& F, const vector<Matrix2d>& Ap, INTERPOLATION& Interpolation );
 	// vector<Matrix2d> ComputeDeltaF(const double timeStep, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& elasticDeformationGradient, INTERPOLATION& Interpolation);
-	vector<Matrix2d> ComputeDeltaF(const double timeStep, const vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& elasticDeformationGradient, INTERPOLATION& Interpolation);
+	void ComputeFHat(double dt, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const vector<Matrix2d>& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
+	vector<Matrix2d> ComputeDeltaF(const double timeStep, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& elasticDeformationGradient, INTERPOLATION& Interpolation);
 	vector<Matrix2d> ComputeDeltaJFiT(const vector<Matrix2d>& F, const vector<Matrix2d>& deltaF);
 	vector<Matrix2d> Compute_dJFiT(const Matrix2d& Fe);
 	vector<Matrix2d> ComputeDeltaR(const vector<Matrix2d>& deltaF, const vector<Matrix2d>& S, const vector<Matrix2d>& R);
 	Matrix2d DoubleDotProduct(const vector<Matrix2d>& C, const Matrix2d& B);
 	double DoubleDotProduct(const Matrix2d& C, const Matrix2d& B);
+	double InnerProduct(vector<Vector2d>& a, vector<Vector2d>& b);
+	vector<Vector2d> scalarVectorProduct(double a, vector<Vector2d>& p);
+	vector<Vector2d> VectorAddition(vector<Vector2d>& p, vector<Vector2d>& q);
+	vector<Vector2d> VectorSubtraction(vector<Vector2d>& p, vector<Vector2d>& q);
+	
 };
 
 

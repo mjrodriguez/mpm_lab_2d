@@ -288,18 +288,18 @@ void CUBE_TO_CUBE_COLLISION::SetDefaultParticles() {
 	m_numberOfParticles = 0;
 	m_area = 0;
 	
-    Vector2d anchor1(0.1,0.5);
-    SetCube( 20, 0.2, anchor1 );
+    Vector2d anchor1(0.01,0.5);
+    SetCube( 25, 0.2, anchor1 );
     // Vector2d anchor2(0.7, 0.5);
-	Vector2d anchor2(0.7, 0.4);
-    SetCube( 20, 0.2, anchor2 );
+	Vector2d anchor2(0.79, 0.4);
+    SetCube( 25, 0.2, anchor2 );
 
     InitializeParticles();
 }
 
 
 void CUBE_TO_CUBE_COLLISION::InitializeParticleVelocities() {
-	Vector2d m_initialVelocity = Vector2d(3,2);
+	Vector2d m_initialVelocity = Vector2d(5,3);
     for (int p = 0; p < m_numberOfParticles/2; p++ ){
         //velocity.push_back( Vector2d( 0.0, 5.0 ) );
         velocity.push_back(Vector2d(m_initialVelocity.x(), m_initialVelocity.y()));
@@ -646,14 +646,14 @@ void RECTANGLE_FREEFALL_HAT_OBSTACLE::ParticleCollision(double frictionCoeff) {
 
 
 void CUBE_CRASH_WALL::SetDefaultParticles() {
-	
+	stickyCollision = true;
 	m_particleSimulationName = string("cube_crash_wall");
 	
 	m_numberOfParticles = 0;
 	m_area = 0;
 	
-    Vector2d anchor1(0.4,0.2);
-    SetCube( 50, 0.2, anchor1 );
+    Vector2d anchor1(0.4,0.7);
+    SetCube( 25, 0.2, anchor1 );
     // Vector2d anchor2(0.7, 0.5);
 	// Vector2d anchor2(0.7, 0.5)
     // SetCube( 20, 0.2, anchor2 );
@@ -663,14 +663,13 @@ void CUBE_CRASH_WALL::SetDefaultParticles() {
 
 
 void CUBE_CRASH_WALL::InitializeParticleVelocities() {
-	Vector2d m_initialVelocity = Vector2d(3,2);
+	Vector2d m_initialVelocity = Vector2d(0,-2.0);
     for (int p = 0; p < m_numberOfParticles; p++ ){
         //velocity.push_back( Vector2d( 0.0, 5.0 ) );
-        velocity.push_back(Vector2d(m_initialVelocity.x(), m_initialVelocity.y()));
+        velocity.push_back(Vector2d( m_initialVelocity.x(), m_initialVelocity.y()));
         velocityPIC.push_back( Vector2d( 0, 0) );
         velocityFLIP.push_back( Vector2d( 0, 0) );
     }
-
 }
 
 
@@ -696,14 +695,17 @@ void CUBE_CRASH_WALL::ParticleCollision(double frictionCoeff) {
         else if (position[p].y() >= ( (double) 0.95) ){
             hasItCollided = true;
             collisionNormal = Vector2d(0,-1);
+			stickyCollision = true;
         }
-        else if (position[p].x() <= (double) 0.05){
+        else if (position[p].x() <= (double) 0.05 ){
             hasItCollided = true;
             collisionNormal = Vector2d(1,0);
+			stickyCollision = true;
         }
-        else if (position[p].x() >= (double) 0.95){
+        else if (position[p].x() >= (double) 0.95 ){
             hasItCollided = true;
             collisionNormal = Vector2d(-1,0);
+			stickyCollision = true;
         }
 
         if (hasItCollided){
@@ -718,7 +720,7 @@ void CUBE_CRASH_WALL::ParticleCollision(double frictionCoeff) {
 
 
                 Vector2d velocityRelPrime;
-                if (tangentVelocity.norm() <= -frictionCoeff*normalVelocity){
+                if (tangentVelocity.norm() <= -frictionCoeff*normalVelocity || stickyCollision){
                     velocityRelPrime = Vector2d(0,0);
                 }
                 else {
@@ -916,7 +918,6 @@ void CUBE_TO_CUBE_FREEFALL::ParticleCollision(double frictionCoeff) {
 
     for (int p = 0; p < m_numberOfParticles; p++){
         bool hasItCollided = false;
-
 		
 		///////////////////////////////////////
 		// GROUND COLLISION
