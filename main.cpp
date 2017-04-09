@@ -55,7 +55,7 @@ int main() {
     Particle.SetDefaultParticles();
     Grid.SetDefaultGrid();
 	double timeToFrame = SimulationParams.GetTimeToFrame();
-	SimulationParams.SetDt( 1.0/60.0 * 1.0/4.0 );
+	SimulationParams.SetDt( 1.0/60.0 * 1.0/16.0 );
 	
 	
 	SimulationParams.SetSimulationName(simulationNumber + "_" + SimulationParams.GetSimulationName());
@@ -116,18 +116,22 @@ int main() {
 		// COMPUTE newVelocity from velocity
 		/////////////////////////////////////////////////////////////////
         Grid.UpdateVelocityGrid(SimulationParams.GetDt());
+		
+		/////////////////////////////////////////////////////////////////////////
+		// EVERYTHING IS UPDATED WITH newVelocity (not velocity)
+		/////////////////////////////////////////////////////////////////////////
+		Grid.GridCollision(SimulationParams.GetFrictionCoeff());
+		
 		if ( SimulationParams.GetBeta() > 0 ){
 			Grid.ImplicitUpdateVelocityGrid(SimulationParams.usePlasticity, SimulationParams.GetBeta(), SimulationParams.GetDt(), SimulationParams.GetMu(), SimulationParams.GetLambda(),  SimulationParams.GetHardeningCoeff(), Particle.JElastic, Particle.JPlastic, Particle.volume, Particle.position, Particle.elasticDeformationGradient, Particle.R, Particle.S, Interpolation, ConstitutiveModel     );
 		}
 		
 		
-		// Grid.AddGravityForce(SimulationParams.gravity);
+		Grid.UpdateGravityVelocityGrid(SimulationParams.GetDt(), SimulationParams.gravity); 
 		
-		/////////////////////////////////////////////////////////////////////////
-		// EVERYTHING IS UPDATED WITH newVelocity (not velocity)
-		/////////////////////////////////////////////////////////////////////////
+	
 
-        Grid.GridCollision(SimulationParams.GetFrictionCoeff());
+        
 		
 
         Grid.UpdateDeformationGradient(SimulationParams.usePlasticity, SimulationParams.GetDt(), SimulationParams.GetCriticalStretch(),

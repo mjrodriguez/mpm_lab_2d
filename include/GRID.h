@@ -111,6 +111,8 @@ public:
     void AddGravityForce(Vector2d &gravity);
 
     void UpdateVelocityGrid(double timeStep);
+	
+	void UpdateGravityVelocityGrid(const double timeStep, const Vector2d& gravity);
 
 	////////////////////////////////////////////////////////
 	// LEVEL SETS and COLLISIONS
@@ -143,8 +145,9 @@ public:
 	vector<Matrix2d> ComputeAp(const double timeStep, const bool usePlasticity, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<Vector2d>& positionParticle, vector<Vector2d>& u, const vector<Matrix2d>& F, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
 	vector<Vector2d> ComputeDeltaForce(const vector<double>& particleVolume, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& F, const vector<Matrix2d>& Ap, INTERPOLATION& Interpolation );
 	// vector<Matrix2d> ComputeDeltaF(const double timeStep, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& elasticDeformationGradient, INTERPOLATION& Interpolation);
-	void ComputeFHat(double dt, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const vector<Matrix2d>& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
-	vector<Matrix2d> ComputeDeltaF(const double timeStep, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& elasticDeformationGradient, INTERPOLATION& Interpolation);
+	// void ComputeFHat(double dt, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const vector<Matrix2d>& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic);
+	void ComputeFHat( const double dt, const Matrix2d& velocityGradient, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const Matrix2d& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation);
+	vector<Matrix2d> ComputeDeltaF(const double timeStep, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, vector<double>& JE_hat, const vector<Matrix2d>& elasticDeformationGradient, vector<Matrix2d>& F_hat, vector<Matrix2d>& R_hat, vector<Matrix2d>& S_hat , INTERPOLATION& Interpolation);
 	vector<Matrix2d> ComputeDeltaJFiT(const vector<Matrix2d>& F, const vector<Matrix2d>& deltaF);
 	vector<Matrix2d> Compute_dJFiT(const Matrix2d& Fe);
 	vector<Matrix2d> ComputeDeltaR(const vector<Matrix2d>& deltaF, const vector<Matrix2d>& S, const vector<Matrix2d>& R);

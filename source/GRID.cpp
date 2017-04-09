@@ -309,6 +309,18 @@ void GRID::UpdateVelocityGrid(double timeStep) {
 }
 
 
+void GRID::UpdateGravityVelocityGrid(const double timeStep, const Vector2d& gravity) {
+    for (int i = 0; i < massList.size(); i++){
+        int ig, jg;
+
+        ig = massList[i].x();
+        jg = massList[i].y();
+
+		newVelocity[ Index2D(ig, jg) ] += timeStep*gravity;
+		
+    }
+}
+
 
 
 
@@ -502,14 +514,21 @@ void GRID::ConjugateResidual(const bool usePlasticity, const double beta, const 
 	
 	// Max Iterations
 	int iter = 0;
-	int maxIters = u.size()*2 + 100;
+	int maxIters = 30;
 	double  alpha, y, test;
 	// compute r -> residual
 	vector<Vector2d> r, s, p, q;
 	
+	// letting Eu = r temporarily to save some space...
 	r = ComputeHessianAction(usePlasticity, beta, dt, mu0, lambda0, hardeningCoeff, JE, JP, particleVolume, u, positionParticle, FE, R, S, Interpolation, Elastoplastic); 
 
 	r = VectorSubtraction(u, r);
+	
+	for (int i = 0; i < u.size(); i++){
+		r[i] = u[i] - r[i];
+	}
+	
+	
 	// for (int i = 0; i < u.size(); i++){
 	// 	cout << u[i].transpose() << endl;
 	// }
@@ -521,9 +540,9 @@ void GRID::ConjugateResidual(const bool usePlasticity, const double beta, const 
 
 	y = InnerProduct(r, s);
 	alpha = y/ InnerProduct(q,q);
-	test = fabs( alpha * InnerProduct(p,p) );
+	test = sqrt( InnerProduct(r,r) );
 	
-	while ( test > 1e-5 && iter <= maxIters ){
+	while ( test > sqrt(InnerProduct(u,u))*1e-5 && iter <= maxIters ){
 			
 		cout << "Iteration " << iter << " | " << "Norm = " << test << endl;
 		double alpha_num = InnerProduct(r,s);
@@ -548,7 +567,7 @@ void GRID::ConjugateResidual(const bool usePlasticity, const double beta, const 
 			q[i] = s[i] + BETA*q[i];
 		}
 		
-		test = fabs( alpha * InnerProduct(r,r) );
+		test = sqrt( InnerProduct(r,r) );
 		iter += 1;
 		
 		// vector<Vector2d> V = scalarVectorProduct(alpha,p);
@@ -580,7 +599,7 @@ void GRID::ConjugateResidual(const bool usePlasticity, const double beta, const 
 	
 }
 
-
+// NOT REALLY BEING USED....
 vector<Vector2d> GRID::scalarVectorProduct(double a, vector<Vector2d>& p){
 	vector<Vector2d> temp;
 	for (int i = 0; i < p.size(); i++){
@@ -588,7 +607,6 @@ vector<Vector2d> GRID::scalarVectorProduct(double a, vector<Vector2d>& p){
 	}
 	return temp;
 }
-
 vector<Vector2d> GRID::VectorSubtraction(vector<Vector2d>& p, vector<Vector2d>& q){
 	vector<Vector2d> temp;
 	for (int i = 0; i < p.size(); i++){
@@ -596,7 +614,6 @@ vector<Vector2d> GRID::VectorSubtraction(vector<Vector2d>& p, vector<Vector2d>& 
 	}
 	return temp;
 }
-
 vector<Vector2d> GRID::VectorAddition(vector<Vector2d>& p, vector<Vector2d>& q){
 	vector<Vector2d> temp;
 	for (int i = 0; i < p.size(); i++){
@@ -604,6 +621,10 @@ vector<Vector2d> GRID::VectorAddition(vector<Vector2d>& p, vector<Vector2d>& q){
 	}
 	return temp;
 }
+
+
+
+
 
 double GRID::InnerProduct(vector<Vector2d>& a, vector<Vector2d>& b){
 	double sum = 0;
@@ -619,6 +640,8 @@ vector<Vector2d> GRID::ComputeHessianAction(const bool usePlasticity, const doub
 	vector<Vector2d> Au, deltaForce;
 	vector<Matrix2d> Ap;
 	// ComputeAp(const double timeStep, const bool usePlasticity, const double mu0, const double lambda0, const double hardeningCoeff, vector<double>& JE, vector<double>& JP, const vector<Vector2d>& positionParticle, const vector<Vector2d>& velocityGrid, const vector<Vector2d>& u, const vector<Matrix2d>& F, const vector<Matrix2d>& R, const vector<Matrix2d>& S, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic)
+	
+	// 
 	Ap = ComputeAp(dt, usePlasticity, mu0, lambda0, hardeningCoeff, JE, JP, positionParticle, u, FE, R, S, Interpolation, Elastoplastic);
 	deltaForce = ComputeDeltaForce(particleVolume, positionParticle, FE, Ap, Interpolation );
 	for (int i = 0; i < deltaForce.size(); i++){
@@ -736,9 +759,13 @@ vector<Vector2d> GRID::ComputeDeltaForce(const vector<double>& particleVolume, c
 
 
 
-vector<Matrix2d> GRID::ComputeDeltaF(const double timeStep, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, const vector<Matrix2d>& elasticDeformationGradient, INTERPOLATION& Interpolation){
+vector<Matrix2d> GRID::ComputeDeltaF(const double timeStep, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, vector<double>& JE_hat, const vector<Matrix2d>& elasticDeformationGradient, vector<Matrix2d>& F_hat, vector<Matrix2d>& R_hat, vector<Matrix2d>& S_hat , INTERPOLATION& Interpolation){
 	vector<Matrix2d> deltaF;
 	
+	// For computing Fhat
+	Matrix2d velocity_Gradient, A;
+	velocity_Gradient = Matrix2d::Zero();
+	A = Matrix2d::Zero();
 	
 	for (int p = 0; p < elasticDeformationGradient.size(); p++){
         Matrix2d deltaFp;
@@ -751,9 +778,15 @@ vector<Matrix2d> GRID::ComputeDeltaF(const double timeStep, vector<Vector2d>& u,
 			Vector2d gradientWeight = Interpolation.GradientWeight(m_h, positionParticle[p], ig, jg);
 			deltaFp += timeStep*u[i]*gradientWeight.transpose()*elasticDeformationGradient[p];
 			
+        	A = newVelocity[ Index2D(ig, jg) ]*gradientWeight.transpose();
+		
+        	velocity_Gradient += A  ;
+			
 		}
 		
 		deltaF.push_back(deltaFp);
+// const double dt, const Matrix2d& velocityGradient, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const Matrix2d& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation
+		ComputeFHat(timeStep, velocity_Gradient, JE_hat, positionParticle, elasticDeformationGradient[p], F_hat, R_hat, S_hat, Interpolation); 
 		
 	}
 	
@@ -770,11 +803,10 @@ vector<Matrix2d> GRID::ComputeAp(const double timeStep, const bool usePlasticity
     vector<Matrix2d> Ap, deltaF, deltaR, deltaJFiT, F_hat, R_hat, S_hat;
     vector<double> mu, lambda, JE_hat;
 	
+	// const double timeStep, vector<Vector2d>& u, const vector<Vector2d>& positionParticle, vector<double>& JE_hat, const vector<Matrix2d>& elasticDeformationGradient, vector<Matrix2d>& F_hat, vector<Matrix2d>& R_hat, vector<Matrix2d>& S_hat , INTERPOLATION& Interpolation
+    deltaF = ComputeDeltaF(timeStep, u, positionParticle, JE_hat, F, F_hat, R_hat, S_hat, Interpolation);
+	Elastoplastic.ComputePolarDecomposition(F_hat, R_hat, S_hat);
 	
-	// ComputeFHat(double dt, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const vector<Vector2d>& vgrid, const vector<Vector2d>& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic)
-	ComputeFHat(timeStep, JE_hat, positionParticle, F, F_hat, R_hat, S_hat, Interpolation, Elastoplastic);
-	
-    deltaF = ComputeDeltaF(timeStep, u, positionParticle, F, Interpolation);
     deltaR = ComputeDeltaR(deltaF, S_hat, R_hat);
     deltaJFiT = ComputeDeltaJFiT(F_hat, deltaF);
     mu = Elastoplastic.ComputeMu(usePlasticity, mu0, hardeningCoeff, JP);
@@ -799,35 +831,48 @@ vector<Matrix2d> GRID::ComputeAp(const double timeStep, const bool usePlasticity
 
 
 
-
-void GRID::ComputeFHat(double dt, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const vector<Matrix2d>& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic){
-    
-	for (int p = 0; p < particlePosition.size(); p++){
-		Vector2d gradientWeight;
-		Matrix2d velocity_Gradient, A;
-		velocity_Gradient = Matrix2d::Zero();
-		A = Matrix2d::Zero();
-	
-		for ( int i = 0; i < massList.size(); i++ ) {
-			int ig, jg;
-			ig = massList[i].x();
-			jg = massList[i].y();
-			gradientWeight = Interpolation.GradientWeight(m_h, particlePosition[p], ig, jg);
-        	A = newVelocity[ Index2D(ig, jg) ]*gradientWeight.transpose();
-		
-        	velocity_Gradient += A  ;
-    	} // END WEIGHT INTERPOLATION TRANSFER
-		F_hat.push_back(F[p] + dt*velocity_Gradient*F[p]);
-		JE_hat.push_back( F_hat[p].determinant() );
-		R_hat.push_back(Matrix2d::Zero());
-		S_hat.push_back(Matrix2d::Zero());
-		
-	}
-	
-	Elastoplastic.ComputePolarDecomposition(F_hat, R_hat, S_hat);
-	
+void GRID::ComputeFHat(const double dt, const Matrix2d& velocityGradient, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const Matrix2d& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation){
+	Matrix2d F_hat_temp = F + dt*velocityGradient*F;
+	double JE_hat_temp = F_hat_temp.determinant();
+	F_hat.push_back(F_hat_temp);
+	JE_hat.push_back( JE_hat_temp );
+	R_hat.push_back(Matrix2d::Zero());
+	S_hat.push_back(Matrix2d::Zero());	
 }
 
+
+
+
+//
+// // OLD VERSION
+// void GRID::ComputeFHat(double dt, vector<double>& JE_hat, const vector<Vector2d>& particlePosition, const vector<Matrix2d>& F, vector<Matrix2d>& F_hat, vector<Matrix2d>&  R_hat, vector<Matrix2d>&  S_hat, INTERPOLATION& Interpolation, ELASTOPLASTIC& Elastoplastic){
+//
+// 	for (int p = 0; p < particlePosition.size(); p++){
+// 		Vector2d gradientWeight;
+// 		Matrix2d velocity_Gradient, A;
+// 		velocity_Gradient = Matrix2d::Zero();
+// 		A = Matrix2d::Zero();
+//
+// 		for ( int i = 0; i < massList.size(); i++ ) {
+// 			int ig, jg;
+// 			ig = massList[i].x();
+// 			jg = massList[i].y();
+// 			gradientWeight = Interpolation.GradientWeight(m_h, particlePosition[p], ig, jg);
+//         	A = newVelocity[ Index2D(ig, jg) ]*gradientWeight.transpose();
+//
+//         	velocity_Gradient += A  ;
+//     	} // END WEIGHT INTERPOLATION TRANSFER
+// 		F_hat.push_back(F[p] + dt*velocity_Gradient*F[p]);
+// 		JE_hat.push_back( F_hat[p].determinant() );
+// 		R_hat.push_back(Matrix2d::Zero());
+// 		S_hat.push_back(Matrix2d::Zero());
+//
+// 	}
+//
+// 	Elastoplastic.ComputePolarDecomposition(F_hat, R_hat, S_hat);
+//
+// }
+//
 
 
 
