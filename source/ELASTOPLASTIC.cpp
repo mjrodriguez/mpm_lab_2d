@@ -17,7 +17,8 @@ vector<double> ELASTOPLASTIC::ComputeMu(bool usePlasticity, double mu0, double h
     vector<double> MU;
     if (usePlasticity  ){
         for (int p = 0; p < JP.size(); p++ ){
-            MU.push_back( mu0*exp( hardeningCoeff*(1-JP[p]) ) );
+			double noise = rand()/RAND_MAX + 1;
+            MU.push_back( (1+noise)*mu0*exp( hardeningCoeff*(1-JP[p]) ) );
         }
     }
     else{
@@ -34,7 +35,8 @@ vector<double> ELASTOPLASTIC::ComputeLambda( bool usePlasticity, double lambda0,
 
     if ( usePlasticity ){
         for (int p = 0; p < JP.size(); p++ ){
-            LAMBDA.push_back( lambda0*exp( hardeningCoeff*(1-JP[p]) ) );
+			double noise = rand()/RAND_MAX + 1;
+            LAMBDA.push_back( (1+noise)*lambda0*exp( hardeningCoeff*( 1-JP[p] ) ) );
         }
     }
     else {
@@ -69,6 +71,8 @@ void ELASTOPLASTIC::CauchyStress(bool usePlasticity, double mu0, double lambda0,
      */
 
     Matrix2d Eye = Matrix2d::Identity();
+	
+	
 
     vector<double> mu = ComputeMu(usePlasticity, mu0, hardeningCoeff, JPlastic);
     vector<double> lambda = ComputeLambda(usePlasticity, lambda0, hardeningCoeff, JPlastic);
@@ -77,7 +81,7 @@ void ELASTOPLASTIC::CauchyStress(bool usePlasticity, double mu0, double lambda0,
     for (int p = 0; p < JElastic.size(); p++){
         // sigma[p] = diffPsi[p]*elasticDeformationGradient[p].transpose()/(JElastic[p]*JPlastic[p]);
         double one_over_J = 1/( JElastic[p] * JPlastic[p]);
-        sigma[p] =  2*mu[p]*one_over_J* (elasticDeformationGradient[p] - R[p]) *elasticDeformationGradient[p].transpose() + lambda[p]*one_over_J*(JElastic[p] - 1)*JElastic[p]*Eye    ;
+        sigma[p] =  2* mu[p] * one_over_J* (elasticDeformationGradient[p] - R[p]) *elasticDeformationGradient[p].transpose() + lambda[p]*one_over_J*(JElastic[p] - 1)*JElastic[p]*Eye    ;
     }
 
     mu.erase(mu.begin(), mu.end());

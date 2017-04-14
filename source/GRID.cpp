@@ -9,6 +9,7 @@
 #include "../include/INTERPOLATION.h"
 #include "../include/ELASTOPLASTIC.h"
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 using namespace Eigen;
@@ -22,7 +23,7 @@ using namespace Eigen;
 
 
 void GRID::SetDefaultGrid() {
-    m_nx = 64;
+    m_nx = 128;
     m_ny = m_nx;
 
     m_xmin = (double) 0;
@@ -53,6 +54,11 @@ double GRID::GetGridSpacing() {
 double GRID::Getxmin() {
     return m_xmin;
 }
+
+double GRID::Getymin() {
+    return m_ymin;
+}
+
 
 double GRID::Getxmax() {
     return m_xmax;
@@ -101,13 +107,18 @@ void GRID::InitializeGrid() {
 void GRID::ComputeGridNodeWeights( vector<Vector2d>& positionParticle, INTERPOLATION& Interpolation ){
     VectorXd wip;
     wip = VectorXd::Zero(positionParticle.size(),1);
-
+	
+	
+	
+	
     for (int i = 0; i < GetN(); i++){
         for (int j = 0; j < GetN(); j++){
 
                 for (int p = 0; p < positionParticle.size(); p ++){
-                    wip[p] = Interpolation.Weight(m_h, positionParticle[p], i, j);
+                    wip[p] = Interpolation.Weight(m_h, positionParticle[p], i, j);		
                 }
+				
+				
 
                 if (wip.norm() != 0){
                     nodeWeights.push_back(wip);
@@ -116,10 +127,13 @@ void GRID::ComputeGridNodeWeights( vector<Vector2d>& positionParticle, INTERPOLA
 
                 wip = VectorXd::Zero(positionParticle.size(),1);
 
-
+				
 
         }
     }
+	
+	
+
 	
 	
 	
@@ -140,41 +154,108 @@ void GRID::ComputeGridNodeWeights( vector<Vector2d>& positionParticle, INTERPOLA
 
 
 
+void GRID::ComputeNeighborhood(Vector2d& positionParticle, Vector2i& gridIndexCenter, Vector2i& minGridIndex, Vector2i& maxGridIndex){
+	
+	Vector2i radius(3,3);
+			
+			gridIndexCenter.x() = floor( ( positionParticle.x() - Getxmin() ) / m_h ) ;
+			gridIndexCenter.y() = floor( ( positionParticle.y() - Getymin() ) / m_h );
+			
+			minGridIndex.x() =  gridIndexCenter.x()  - radius.x();
+			minGridIndex.y() =  gridIndexCenter.y()  - radius.y();
+			maxGridIndex.x() =  gridIndexCenter.x()  + radius.x();
+			maxGridIndex.y() =  gridIndexCenter.y()  + radius.y();
+		
+			if ( minGridIndex.x() < 0 ){
+				minGridIndex.x() = 0;
+			}
+			if (minGridIndex.y() < 0) {
+				minGridIndex.y() = 0;
+			}
+		
+			if ( maxGridIndex.x() > GetN() ){
+				maxGridIndex.x() = GetN();
+			}
+			
+			if( maxGridIndex.y() > GetN() ){
+				maxGridIndex.y() = GetN();
+			}
+	
+		
+}
+
+
+
 void GRID::ParticleToGrid( vector<double>& massParticle, vector<Vector2d>& positionParticle, vector<Vector2d>& velocityParticle, INTERPOLATION& Interpolation) {
+    
+	clock_t begin_P2G = clock();
+	
+    // double massWeighted = 0;
+    // Vector2d momentumWeighted = Vector2d (0, 0);
+    //
+    //
+    // for (int i = 0; i < nodeWeightsList.size(); i++){
+    //
+    //     // Setting the node indices to something easier to type
+    //     int iw = nodeWeightsList[i].x();
+    //     int jw = nodeWeightsList[i].y();
+    //
+    //     for (int p = 0; p < massParticle.size(); p++){
+    //
+    //         massWeighted += massParticle[p]*nodeWeights[i][p];
+    //         momentumWeighted.x() += velocityParticle[p].x()*massParticle[p]*nodeWeights[i][p];
+    //         momentumWeighted.y() += velocityParticle[p].y()*massParticle[p]*nodeWeights[i][p];
+    //     }
+    //
+    //
+    //     // cout << "Weighted Mass = " << massWeighted << endl;
+    //
+    //     mass[ Index2D(iw, jw) ] = massWeighted;
+    //     if (mass[ Index2D(iw, jw)] != 0 ){
+    //         velocity[Index2D(iw, jw)].x() = momentumWeighted.x()/mass[Index2D(iw, jw)];
+    //         velocity[Index2D(iw, jw)].y() = momentumWeighted.y()/mass[Index2D(iw, jw)];
+    //     }
+    //
+    //     massWeighted = 0;
+    //     momentumWeighted = Vector2d (0, 0);
+    //
+    //
+    //
+    // }
+	
+	
+	
+	for (int p = 0; p < massParticle.size(); p++){
 
-    double massWeighted = 0;
-    Vector2d momentumWeighted = Vector2d (0, 0);
+
+		Vector2i minGridIndex, maxGridIndex, centerIndex;
+		ComputeNeighborhood(positionParticle[p], centerIndex, minGridIndex, maxGridIndex);
 
 
-    for (int i = 0; i < nodeWeightsList.size(); i++){
+		int imin = minGridIndex.x();
+		int jmin = minGridIndex.y();
 
-        // Setting the node indices to something easier to type
-        int iw = nodeWeightsList[i].x();
-        int jw = nodeWeightsList[i].y();
+		int imax = maxGridIndex.x();
+		int jmax = maxGridIndex.y();
 
-        for (int p = 0; p < massParticle.size(); p++){
-
-            massWeighted += massParticle[p]*nodeWeights[i][p];
-            momentumWeighted.x() += velocityParticle[p].x()*massParticle[p]*nodeWeights[i][p];
-            momentumWeighted.y() += velocityParticle[p].y()*massParticle[p]*nodeWeights[i][p];
-        }
+		int ig = centerIndex.x();
+		int jg = centerIndex.y();
 
 
-        // cout << "Weighted Mass = " << massWeighted << endl;
-
-        mass[ Index2D(iw, jw) ] = massWeighted;
-        if (mass[ Index2D(iw, jw)] != 0 ){
-            velocity[Index2D(iw, jw)].x() = momentumWeighted.x()/mass[Index2D(iw, jw)];
-            velocity[Index2D(iw, jw)].y() = momentumWeighted.y()/mass[Index2D(iw, jw)];
-        }
-
-        massWeighted = 0;
-        momentumWeighted = Vector2d (0, 0);
+		for (int i = imin; i < imax; i++){
+			for (int j = jmin; j < jmax; j++){
+				double wip = Interpolation.Weight(m_h, positionParticle[p], i, j);
+				mass[ Index2D(ig,jg) ] += massParticle[p] * wip;
+				velocity[ Index2D(ig,jg) ] += velocityParticle[p]*massParticle[p] * wip;
+			}
+		}
 
 
+	}
 
-    }
-
+    clock_t end_P2G = clock();
+    double totalTime = double(end_P2G - begin_P2G)/CLOCKS_PER_SEC;
+    cout << "Time for P2G = " << totalTime << " seconds." << endl;
 
     /* double wip = 0;
      double massWeighted = 0;
@@ -236,13 +317,19 @@ void GRID::NodesWithMass() {
             }
         }
     }*/
+	
+	for (int i = 0; i < GetN(); i++){
+		for (int j = 0; j < GetN(); j++){
+			if (mass[Index2D(i,j)] != 0){
+				velocity[Index2D(i,j)] = velocity[Index2D(i,j)]/mass[Index2D(i,j)]; 
+				massList.push_back(Vector2i(i,j));
+			}
+		}
+	}
 
-    massList = nodeWeightsList;
+    //massList = nodeWeightsList;
 
     cout << "Length of massList = " << massList.size() << endl;
-    cout << "Length of nodeWeightsList = " << nodeWeightsList.size() << endl;
-
-    // cin.get();
 
 }
 
@@ -482,6 +569,8 @@ void GRID::ImplicitUpdateVelocityGrid(const bool usePlasticity, const double bet
 	}
 	
 	
+
+	
 	// vector<Vector2d> V1;
 	// Vector2d v(0,1);
 	// V1.push_back(v);
@@ -522,7 +611,7 @@ void GRID::ConjugateResidual(const bool usePlasticity, const double beta, const 
 	// letting Eu = r temporarily to save some space...
 	r = ComputeHessianAction(usePlasticity, beta, dt, mu0, lambda0, hardeningCoeff, JE, JP, particleVolume, u, positionParticle, FE, R, S, Interpolation, Elastoplastic); 
 
-	r = VectorSubtraction(u, r);
+	// r = VectorSubtraction(u, r);
 	
 	for (int i = 0; i < u.size(); i++){
 		r[i] = u[i] - r[i];

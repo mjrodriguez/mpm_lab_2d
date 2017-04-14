@@ -57,7 +57,7 @@ public:
     double GetGridSpacing();
 
     double Getxmin();
-
+	double Getymin();
     double Getxmax();
 
     int GetN();
@@ -92,15 +92,14 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////
 
     void ComputeGridNodeWeights(vector<Vector2d> &positionParticle, INTERPOLATION &Interpolation);
-
+	void ComputeNeighborhood(Vector2d& positionParticle, Vector2i& gridIndexCenter, Vector2i& minGridIndex, Vector2i& maxGridIndex);
 
     void ParticleToGrid(vector<double> &massParticle, vector<Vector2d> &positionParticle, vector<Vector2d> &velocityParticle,
                    INTERPOLATION &Interpolation);
 
     void NodesWithMass();
 
-    void
-    ComputeGridForces(bool usePlasticity, double mu0, double lambda0, double hardeningCoeff, vector<double> &JElastic,
+    void ComputeGridForces(bool usePlasticity, double mu0, double lambda0, double hardeningCoeff, vector<double> &JElastic,
                       vector<double> &JPlastic,
                       vector<double> &volumeParticle, vector<Vector2d> &positionParticle,
                       vector<Matrix2d> &cauchyStress,

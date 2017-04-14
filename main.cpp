@@ -23,19 +23,19 @@ int main() {
     FILE_IO FileIO;
 	INTERPOLATION Interpolation;
     
-	// GRID_NO_OBSTACLE Grid;
-	GRID_HAT_OBSTACLE Grid;
+	GRID_NO_OBSTACLE Grid;
+	// GRID_HAT_OBSTACLE Grid;
 	// GRID_CYLINDER_OBSTACLE Grid;
 	
     // CUBE_TO_CUBE_FREEFALL Particle;
-   	// CUBE_CRASH_WALL Particle;
+   	CUBE_CRASH_WALL Particle;
 	// CUBE_TO_CUBE_COLLISION Particle;
     // CUBE_CRASH_PADDED_GROUND Particle;
-	RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
+	// RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
 	// RECTANGLE_FREEFALL_CYLINDER Particle;
 	
-	// DEFAULT_PARAMETERS SimulationParams;
-	DEFAULT_IMPLICIT_PARAMETERS SimulationParams;
+	DEFAULT_PARAMETERS SimulationParams;
+	// DEFAULT_IMPLICIT_PARAMETERS SimulationParams;
     // HYPERELASTICITY SimulationParams;
     // LOWER_CRITICAL_COMPRESSION_PARAMETERS SimulationParams;
     // LOWER_CRITICAL_STRETCH_PARAMETERS SimulationParams;
@@ -55,7 +55,7 @@ int main() {
     Particle.SetDefaultParticles();
     Grid.SetDefaultGrid();
 	double timeToFrame = SimulationParams.GetTimeToFrame();
-	SimulationParams.SetDt( 1.0/60.0 * 1.0/16.0 );
+	 SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
 	
 	
 	SimulationParams.SetSimulationName(simulationNumber + "_" + SimulationParams.GetSimulationName());
@@ -63,6 +63,21 @@ int main() {
     cout << "Run this simulation? " << SimulationParams.GetSimulationName() << "_"+Particle.GetParticleSimulationName() << endl;
     cout << "Save to this directory? " << directory << endl;
     cin.get();
+
+
+
+
+	// vector<Matrix2d> TEST;
+	// TEST.push_back(Matrix2d::Identity());
+	// TEST.push_back(Matrix2d::Identity());
+	// TEST.push_back(Matrix2d::Identity());
+	// TEST.push_back(Matrix2d::Identity());
+	// // Matrix2d A;
+	// double A;
+	// A = Grid.DoubleDotProduct(Matrix2d::Identity(), Matrix2d::Identity());
+	// cout << A << endl;
+	// 	cin.get();
+
 
     ///////////////////////////////////////
     // SAVE SIMULATION PARAMETERS
@@ -93,13 +108,17 @@ int main() {
 
         iterationCounter += 1;
 
-        Grid.ComputeGridNodeWeights(Particle.position, Interpolation);
+        // Grid.ComputeGridNodeWeights(Particle.position, Interpolation);
+		
+		// Grid.ComputeNeighborhoods(Particle.position);
+		
         Grid.ParticleToGrid( Particle.mass, Particle.position, Particle.velocity, Interpolation);
         Grid.NodesWithMass();
 
         cout << "Mass on Particles = " << Tools.Sum(Particle.mass) << endl;
         cout << "Mass on Grid = " << Tools.Sum(Grid.mass) << endl;
-
+		cin.get();
+		
         if (currentTime == 0){
             Particle.ComputeVolumeDensity(Grid.GetN(), Grid.GetGridSpacing(), Grid.mass, Grid.massList, Tools, Interpolation);
         }
@@ -171,7 +190,7 @@ int main() {
 		
 		
 		// CFL SET DT
-        // SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
+        SimulationParams.SetDt(Grid.GetGridSpacing(), timeToFrame, Particle.velocity );
         timeStep.push_back(SimulationParams.GetDt());
 
         clock_t end = clock();

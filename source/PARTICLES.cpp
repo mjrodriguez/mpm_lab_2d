@@ -652,8 +652,8 @@ void CUBE_CRASH_WALL::SetDefaultParticles() {
 	m_numberOfParticles = 0;
 	m_area = 0;
 	
-    Vector2d anchor1(0.4,0.7);
-    SetCube( 25, 0.2, anchor1 );
+    Vector2d anchor1(0.2,0.4);
+    SetCube( 40, 0.15, anchor1 );
     // Vector2d anchor2(0.7, 0.5);
 	// Vector2d anchor2(0.7, 0.5)
     // SetCube( 20, 0.2, anchor2 );
@@ -663,7 +663,7 @@ void CUBE_CRASH_WALL::SetDefaultParticles() {
 
 
 void CUBE_CRASH_WALL::InitializeParticleVelocities() {
-	Vector2d m_initialVelocity = Vector2d(0,-2.0);
+	Vector2d m_initialVelocity = Vector2d(3,3.0);
     for (int p = 0; p < m_numberOfParticles; p++ ){
         //velocity.push_back( Vector2d( 0.0, 5.0 ) );
         velocity.push_back(Vector2d( m_initialVelocity.x(), m_initialVelocity.y()));
