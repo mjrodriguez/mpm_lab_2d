@@ -1,7 +1,7 @@
 OFILES = main.o ./source/ELASTOPLASTIC.o ./source/INTERPOLATION.o ./source/TOOLS.o ./source/PARTICLES.o ./source/GRID.o ./source/SIMULATION_PARAMETERS.o ./source/FILE_IO.o 
 TARGET = mpm
 CC = g++
-CFLAGS = -Wall -pedantic -std=c++11 -O2
+CFLAGS = -Wall -pedantic -std=c++99 -O2
 
 $(TARGET): $(OFILES)
 	$(CC) $(OFILES) -o $@

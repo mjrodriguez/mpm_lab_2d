@@ -50,9 +50,9 @@ void SIMULATION_PARAMETERS::SetDt(const double h, const double timeToFrame, cons
     }
     else {
         m_dt = m_CFL*h/maxVp;
-		// if (m_dt > 1e-4){
-		// 	m_dt = 1e-3;
-		// }
+		if (m_dt > 1e-4){
+			m_dt = 1e-4;
+		}
 		if (m_dt > timeToFrame){
 			m_dt = timeToFrame;
 		}

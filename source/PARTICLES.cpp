@@ -8,6 +8,7 @@
 #include "../include/INTERPOLATION.h"
 #include "../include/PARTICLES.h"
 #include "../include/TOOLS.h"
+#include "../include/GRID.h"
 #include <iostream>
 #include <math.h>       /* sin */
 
@@ -194,12 +195,7 @@ void PARTICLES::InitializeDeformationGradients() {
 
 void PARTICLES::UpdateParticleVelocity(double alpha)  {
     for (int p = 0; p < m_numberOfParticles; p++ ){
-
         velocity[p] = ( (double) 1 - alpha )*velocityPIC[p] + alpha*velocityFLIP[p];
-
-//        velocity[p].x() = ( 1.0 - alpha )*velocityPIC[p].x() + alpha*velocityFLIP[p].x();
-//        velocity[p].y() = ( 1.0 - alpha )*velocityPIC[p].y() + alpha*velocityFLIP[p].y();
-//        velocity[p].z() = ( 1.0 - alpha )*velocityPIC[p].z() + alpha*velocityFLIP[p].z();
     }
 }
 
@@ -217,52 +213,141 @@ void PARTICLES::UpdateParticlePosition(double timeStep) {
 
 
 
-void PARTICLES::ComputeVolumeDensity( int N, double h, vector<double>& massGrid, vector<Vector2i>& massList, TOOLS Tools, INTERPOLATION Interpolation ) {
+// void PARTICLES::ComputeVolumeDensity( int N, double h, vector<double>& massGrid, vector<Vector2i>& massList, TOOLS Tools, INTERPOLATION Interpolation ) {
+//
+//     double densityGrid = 0;
+//     double rho_temp = 0;
+//
+//     for (int p = 0; p < GetNumberOfParticles(); p++) {
+//         for (int i = 0; i < massList.size(); i++) {
+//             densityGrid = massGrid[ Tools.Index2D(N, massList[i].x(), massList[i].y()) ]/(h*h);
+//             rho_temp += densityGrid*Interpolation.Weight(h, position[p], massList[i].x(), massList[i].y()  );
+//         }
+//         density[p] = rho_temp;
+//         volume[p] = mass[p]/rho_temp;
+//
+//         densityGrid = 0;
+//         rho_temp = 0;
+//
+//     }
+//
+// }
+
+void PARTICLES::ComputeVolumeDensity( GRID& Grid, INTERPOLATION& Interpolation ) {
 
     double densityGrid = 0;
     double rho_temp = 0;
-
+	double h = Grid.GetGridSpacing();
+	
     for (int p = 0; p < GetNumberOfParticles(); p++) {
-        for (int i = 0; i < massList.size(); i++) {
-            densityGrid = massGrid[ Tools.Index2D(N, massList[i].x(), massList[i].y()) ]/(h*h);
-            rho_temp += densityGrid*Interpolation.Weight(h, position[p], massList[i].x(), massList[i].y()  );
-        }
-        density[p] = rho_temp;
-        volume[p] = mass[p]/rho_temp;
+        // for (int i = 0; i < massList.size(); i++) {
+        //     densityGrid = massGrid[ Tools.Index2D(N, massList[i].x(), massList[i].y()) ]/(h*h);
+        //     rho_temp += densityGrid*Interpolation.Weight(h, position[p], massList[i].x(), massList[i].y()  );
+        // }
+        // density[p] = rho_temp;
+        // volume[p] = mass[p]/rho_temp;
+        //
+        // densityGrid = 0;
+        // rho_temp = 0;
+        //
+        //
+		
+		Vector2i minGridIndex, maxGridIndex, centerIndex;
+		Grid.ComputeNeighborhood(position[p], centerIndex, minGridIndex, maxGridIndex);
 
-        densityGrid = 0;
-        rho_temp = 0;
 
+		int imin = minGridIndex.x();
+		int jmin = minGridIndex.y();
+
+		int imax = maxGridIndex.x();
+		int jmax = maxGridIndex.y();
+
+		int ig = centerIndex.x();
+		int jg = centerIndex.y();
+		
+		double totalWip = 0;
+		for (int i = imin; i < imax; i++){
+			for (int j = jmin; j < jmax; j++){
+				double wip = Interpolation.Weight(h, position[p], i, j);
+				double densityGrid = Grid.mass[ Grid.Index2D(ig,jg)]/(h*h);
+				density[p] += densityGrid*wip;
+				totalWip += wip;
+			}
+		}
+		volume[p] = mass[p]/density[p];
     }
-
 }
 
 
 
-void PARTICLES::ComputePicFlipVelocities(int N, double h, vector<Vector2i>& massList,  vector<VectorXd>& gridNodeWeights, vector<Vector2d>& velocityGrid, vector<Vector2d>& newVelocityGrid, TOOLS Tools, INTERPOLATION Interpolation ) {
-    for (int p = 0; p < m_numberOfParticles; p++) {
+// void PARTICLES::ComputePicFlipVelocities(int N, double h, vector<Vector2i>& massList,  vector<VectorXd>& gridNodeWeights, vector<Vector2d>& velocityGrid, vector<Vector2d>& newVelocityGrid, TOOLS Tools, INTERPOLATION Interpolation ) {
+//     for (int p = 0; p < m_numberOfParticles; p++) {
+//         velocityFLIP[p] = velocity[p]; // Vector3d::Zero();
+//         velocityPIC[p] = Vector2d::Zero();
+//
+//
+//
+//
+//         for (int i = 0; i < massList.size(); i++) {
+//             int ig, jg;
+//             ig = massList[i].x();
+//             jg = massList[i].y();
+//             double wip = gridNodeWeights[i][p]; //Interpolation.Weight(h, position[p], ig,jg,kg);
+//             velocityPIC[p] += newVelocityGrid[ Tools.Index2D(N,ig,jg) ]*wip;
+//             velocityFLIP[p] += ( newVelocityGrid[Tools.Index2D(N,ig,jg)] - velocityGrid[ Tools.Index2D(N,ig,jg) ] )*wip;
+//         }
+//
+//         // cout << "Particle " << p << ": Difference of PIC and FLIP =  " << (velocityPIC[p].transpose() - velocityFLIP[p].transpose()).norm() << endl;
+//
+//         // velocityFLIP[p] += velocity[p];
+//
+//     }
+//
+// }
+
+void PARTICLES::ComputePicFlipVelocities( GRID& Grid, INTERPOLATION& Interpolation ) {
+    double h = Grid.GetGridSpacing();
+	for (int p = 0; p < m_numberOfParticles; p++) {
         velocityFLIP[p] = velocity[p]; // Vector3d::Zero();
         velocityPIC[p] = Vector2d::Zero();
+		
+		
+		Vector2i minGridIndex, maxGridIndex, centerIndex;
+		Grid.ComputeNeighborhood(position[p], centerIndex, minGridIndex, maxGridIndex);
 
 
+		int imin = minGridIndex.x();
+		int jmin = minGridIndex.y();
 
-        for (int i = 0; i < massList.size(); i++) {
-            int ig, jg;
-            ig = massList[i].x();
-            jg = massList[i].y();
-            double wip = gridNodeWeights[i][p]; //Interpolation.Weight(h, position[p], ig,jg,kg);
-            velocityPIC[p] += newVelocityGrid[ Tools.Index2D(N,ig,jg) ]*wip;
-            velocityFLIP[p] += ( newVelocityGrid[Tools.Index2D(N,ig,jg)] - velocityGrid[ Tools.Index2D(N,ig,jg) ] )*wip;
-        }
+		int imax = maxGridIndex.x();
+		int jmax = maxGridIndex.y();
 
-        // cout << "Particle " << p << ": Difference of PIC and FLIP =  " << (velocityPIC[p].transpose() - velocityFLIP[p].transpose()).norm() << endl;
+		int ig = centerIndex.x();
+		int jg = centerIndex.y();
 
-        // velocityFLIP[p] += velocity[p];
+		for (int i = imin; i < imax; i++){
+			for (int j = jmin; j < jmax; j++){
+				double wip = Interpolation.Weight(h, position[p], i, j);
+				velocityPIC[p] += Grid.newVelocity[ Grid.Index2D(ig,jg) ]*wip;
+				velocityFLIP[p] += ( Grid.newVelocity[Grid.Index2D(ig,jg)] - Grid.velocity[ Grid.Index2D(ig,jg) ] )*wip;
+			}
+		}
+		
 
+        // for (int i = 0; i < massList.size(); i++) {
+        //     int ig, jg;
+        //     ig = massList[i].x();
+        //     jg = massList[i].y();
+        //     double wip = gridNodeWeights[i][p]; //Interpolation.Weight(h, position[p], ig,jg,kg);
+        //     velocityPIC[p] += newVelocityGrid[ Tools.Index2D(N,ig,jg) ]*wip;
+        //     velocityFLIP[p] += ( newVelocityGrid[Tools.Index2D(N,ig,jg)] - velocityGrid[ Tools.Index2D(N,ig,jg) ] )*wip;
+        // }
+
+       // cout << "Particle " << p << ": Difference of PIC and FLIP =  " << (velocityPIC[p].transpose() - velocityFLIP[p].transpose()).norm() << endl;
+		
     }
 
 }
-
 
 
 
@@ -546,7 +631,7 @@ void RECTANGLE_FREEFALL_HAT_OBSTACLE::SetDefaultParticles() {
     SetCube( 20, 0.2, anchor2 );
 	*/
 	
-    Vector2d anchor1(0.3,0.75);
+    Vector2d anchor1(0.3,0.79);
     SetRectangle( 50, 25, 0.4, 0.2, anchor1 );
 	
 
@@ -652,8 +737,8 @@ void CUBE_CRASH_WALL::SetDefaultParticles() {
 	m_numberOfParticles = 0;
 	m_area = 0;
 	
-    Vector2d anchor1(0.2,0.4);
-    SetCube( 40, 0.15, anchor1 );
+    Vector2d anchor1(0.4,0.7);
+    SetCube( 40, 0.2, anchor1 );
     // Vector2d anchor2(0.7, 0.5);
 	// Vector2d anchor2(0.7, 0.5)
     // SetCube( 20, 0.2, anchor2 );
@@ -663,7 +748,7 @@ void CUBE_CRASH_WALL::SetDefaultParticles() {
 
 
 void CUBE_CRASH_WALL::InitializeParticleVelocities() {
-	Vector2d m_initialVelocity = Vector2d(3,3.0);
+	Vector2d m_initialVelocity = Vector2d(0,-1);
     for (int p = 0; p < m_numberOfParticles; p++ ){
         //velocity.push_back( Vector2d( 0.0, 5.0 ) );
         velocity.push_back(Vector2d( m_initialVelocity.x(), m_initialVelocity.y()));

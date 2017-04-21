@@ -68,7 +68,7 @@ public:
     void InitializePositionGrid();
 
     void InitializeVelocityGrid();
-
+	void InitializeForceGrid();
     void InitializeGrid();
 
 

@@ -14,6 +14,8 @@ clean:
 	rm ./output/deformation_gradient/*.txt
 	rm ./output/elastic_deformation_gradient/*.txt
 	rm ./output/plastic_deformation_gradient/*.txt
+	rm ./output/*.txt
+	rm ./*.zip
 
 # OUTPUT FROM "gcc -MM":
 
