@@ -367,20 +367,20 @@ void GRID::ComputeGridForces(bool usePlasticity, double mu0, double lambda0, dou
                              vector<double>& volumeParticle, vector<Vector2d>& positionParticle, vector<Matrix2d>& cauchyStress,
                              vector<Matrix2d>& elasticDeformationGradient, vector<Matrix2d>& RE, vector<Matrix2d>& SE, ELASTOPLASTIC& ConstitutiveModel, INTERPOLATION& Interpolation) {
 
-    // force.reserve(massList.size());
 	clock_t begin_P2G = clock();
-	
-	// for (int p = 0; p < elasticDeformationGradient.size(); p++){
-// 		cout << "------------------------" << endl;
-// 		cout << elasticDeformationGradient[p] << endl;
-// 		cout << "------------------------" << endl;
-// 	}
-// 	cin.get();
-	
     ConstitutiveModel.CauchyStress(usePlasticity, mu0, lambda0, hardeningCoeff, cauchyStress, JElastic, JPlastic, elasticDeformationGradient, RE, SE);
 
-
-
+	// for (int p = 0; p < cauchyStress.size(); p++ ){
+	//
+	// 	cout << "-------------------------------------" << endl;
+	// 	cout << cauchyStress[p] << endl;
+	// 	cout << "......................" << endl;
+	// 	cout << "Norm of sigma = " << cauchyStress[p].norm() << endl;
+	//
+	// }
+	// cin.get();
+	
+	// commented out
 
 	// cout << SIGMA[1] << endl;
 
@@ -413,15 +413,21 @@ void GRID::ComputeGridForces(bool usePlasticity, double mu0, double lambda0, dou
 			// if (p == 0){
 			// 	cout << "Center Index ForceUpdate = "<< centerIndex.transpose() << endl;
 			// }
+			Vector2d totalDWIP = Vector2d(0,0);
 			for (int i = imin; i < imax; i++){
 				for (int j = jmin; j < jmax; j++){
 					Vector2d d_wip = Interpolation.GradientWeight(m_h, positionParticle[p], i, j);
 					force[ Index2D(ig,jg) ] += -JElastic[p]*JPlastic[p]*volumeParticle[p]*cauchyStress[p]*d_wip;
+					totalDWIP += d_wip;
 				}
 			}
 			
+			// cout << "Total Dwip = " << totalDWIP.transpose() << endl;
+			
+			
             // FORCE += -JElastic[p]*JPlastic[p]*volumeParticle[p]*cauchyStress[p]*Interpolation.GradientWeight(m_h, positionParticle[p], ig, jg);
         }
+		// cin.get();
 		
 	    clock_t end_P2G = clock();
 	    double totalTime = double(end_P2G - begin_P2G)/CLOCKS_PER_SEC;
@@ -517,6 +523,7 @@ void GRID::UpdateDeformationGradient(bool usePlasticity, double timeStep, double
 
 		Matrix2d velocity_Gradient;
 		velocity_Gradient = Matrix2d::Zero();
+		
 		for (int i = imin; i < imax; i++){
 			for (int j = jmin; j < jmax; j++){
 				Vector2d d_wip = Interpolation.GradientWeight(m_h, positionParticle[p], i, j);

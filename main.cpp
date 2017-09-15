@@ -70,7 +70,7 @@ int main() {
     ///////////////////////////////////////
     // SAVE SIMULATION PARAMETERS
     ////////////////////////////////////////
-	FileIO.WriteSimulationParameters(directory, Particle, Grid, SimulationParams);
+	// FileIO.WriteSimulationParameters(directory, Particle, Grid, SimulationParams);
 
 
     double currentTime = 0;
@@ -82,10 +82,10 @@ int main() {
 	
 	
     // WRITING INITIAL CONDITIONS
-	FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
+	// FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
 	
-	cout << "-------------------------------------------------------------------------------------------------------------------------------" << endl;
-	cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() << " | Current Time Step Size: " << SimulationParams.GetDt() << endl;
+	cout << "--------------------------------------------------------------------------------------------------" << endl;
+	cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() << endl;
 	cout << "Current Time: " << currentTime << " | Current Iteration: " << iterationCounter << " | Current Frame: " << frameNumber <<  endl;
 	cout << "Saving Directory = " << directory << endl;
 	
@@ -99,7 +99,9 @@ int main() {
 		// cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() << " | Current Time Step Size: " << SimulationParams.GetDt() << endl;
 		// cout << "Current Time: " << currentTime << " | Current Iteration: " << iterationCounter << " | Current Frame: " << frameNumber <<  endl;
 		// cout << "Saving Directory = " << directory << endl;
-
+	
+		cout << "." << flush;
+		
         iterationCounter += 1;
 		
         Grid.ParticleToGrid( Particle.mass, Particle.position, Particle.velocity, Interpolation);
@@ -118,25 +120,9 @@ int main() {
 		/////////////////////////////////////////////////////////////////
 
         Grid.ComputeGridForces(SimulationParams.usePlasticity, SimulationParams.GetMu(), SimulationParams.GetLambda(), SimulationParams.GetHardeningCoeff(), Particle.JElastic, Particle.JPlastic, Particle.volume, Particle.position, Particle.cauchyStress, Particle.elasticDeformationGradient, Particle.R, Particle.S, ConstitutiveModel, Interpolation);
-        // cout << "Max Force from Internal Stress = " << Tools.MaxNormValue(Grid.force) << endl;
-        // cout << "Min Force from Internal Stress = " << Tools.MinNormValue(Grid.force) << endl;
 
-		// if (iterationCounter > 180 ){
-		// 	for (int i = 0; i < Grid.massList.size(); i++){
-		// 		int ig = Grid.massList[i].x();
-		// 		int jg = Grid.massList[i].y();
-		// 		cout << "Force at " << Grid.massList[i].transpose() << " = " << Grid.force[Grid.Index2D(ig,jg)].transpose() << endl;
-		// 	}
-		// }
 		
-		// if (iterationCounter > 10 ){
-		// 	for (int p = 0; p < Particle.position.size(); p++){
-		// 		cout << "---------------------------------" << endl;
-		// 		cout << "Particle J Plastic " << p << " = \n" << Particle.JPlastic[p] << endl;
-		// 	}
-		// }
-		
-        Grid.AddGravityForce(SimulationParams.gravity);
+        // Grid.AddGravityForce(SimulationParams.gravity);
 		
 
 
@@ -166,18 +152,6 @@ int main() {
         Particle.ParticleCollision(SimulationParams.GetFrictionCoeff());
 		Particle.UpdateParticlePosition(SimulationParams.GetDt());
 		
-		// if (iterationCounter > 180 ){
-		// 	for (int p = 0; p < Particle.position.size(); p++){
-		//
-		// 		cout << "Particle Position " << p << " = " << Particle.position[p].transpose() << endl;
-		// 		cout << "Particle Velocity " << p << " = " << Particle.velocity[p].transpose() << endl;
-		// 		cout << "Particle Jacobian " << p << " = " << Particle.JElastic[p] << endl;
-		// 	}
-		// }
-		
-        // cout << "Max Velocity = " << Tools.MaxNormValue(Particle.velocity) << endl;
-        // cout << "First Particle  = " << Particle.position[0].transpose() << endl;
-
 		timeToFrame -= SimulationParams.GetDt();
 		
 		if ( timeToFrame == 0 ){
@@ -185,15 +159,16 @@ int main() {
 			clock_t end_frame = clock();
 			 double timePerFrame = double(end_frame - begin_frame)/CLOCKS_PER_SEC;
 			
-			
-			cout << "-------------------------------------------------------------------------------------------------------------------------------" << endl;
-			cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() << " | Current Time Step Size: " << SimulationParams.GetDt() << endl;
+			cout << endl;
+			cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() <<  endl;
 			cout << "Current Time: " << currentTime << " | Current Iteration: " << iterationCounter << " | Current Frame: " << frameNumber <<  endl;
 			cout << "Saving Directory = " << directory << endl;
 	        cout << "Mass on Particles = " << Tools.Sum(Particle.mass) << endl;
 	        cout << "Mass on Grid = " << Tools.Sum(Grid.mass) << endl;
 	        cout << "Max Force = " << Tools.MaxNormValue(Grid.force) << endl;
 	        cout << "Min Force = " << Tools.MinNormValue(Grid.force) << endl;
+			cout << "Max PIC Velocity = " << Tools.MaxNormValue(Particle.velocityPIC) << endl;
+			cout << "Max FLIP Velocity = " << Tools. MaxNormValue(Particle.velocityFLIP) << endl;
 			cout << "Max Velocity = " << Tools.MaxNormValue(Particle.velocity) << endl;
 			cout << "First Particle  = " << Particle.position[0].transpose() << endl;
 			cout << "Time per Frame = " << timePerFrame << endl;
@@ -201,7 +176,9 @@ int main() {
 			begin_frame = clock();
 			
 			// WRITING OUTPUT FOR FRAME
-			FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
+			// FileIO.WriteOutput(directory, SimulationParams.GetSimulationName(), frameNumber, Particle.position, Particle.velocity, Particle.cauchyStress, Particle.deformationGradient, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient);
+			
+			// Resetting the time Frame counter.
 			timeToFrame = SimulationParams.GetTimeToFrame();
 		}
 
