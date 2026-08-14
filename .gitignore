@@ -1,0 +1,10 @@
+# Build artifacts
+*.o
+mpm
+
+# CMake
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile

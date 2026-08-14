@@ -5,4 +5,12 @@ This code uses a hyperelastic model coupled with plastic deformation determined 
 
 
 # Compiling:
-Compiling the code you just need to run the **make** command. Since the **Eigen Linear Algebra** package is a just header files then no need to install or compile any of the files. 
+This project uses **CMake**. Since the **Eigen Linear Algebra** package is just header files, no need to install or compile it separately.
+
+```
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
+
+The resulting `mpm` executable will be in the `build` directory.
