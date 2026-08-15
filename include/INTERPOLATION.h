@@ -5,7 +5,7 @@
 #ifndef MPM_V4_0_INTERPOLATION_H
 #define MPM_V4_0_INTERPOLATION_H
 
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 
 using namespace Eigen;
 

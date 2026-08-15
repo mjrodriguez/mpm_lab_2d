@@ -3,8 +3,8 @@
 //
 
 #include <vector>
-#include "../Eigen/Dense"
-#include "../Eigen/Geometry" 
+#include <Eigen/Dense>
+#include <Eigen/Geometry> 
 #include "../include/INTERPOLATION.h"
 #include "../include/PARTICLES.h"
 #include "../include/TOOLS.h"

@@ -6,7 +6,7 @@
 #define MPM_LAB_2D_TOOLS_H
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include "PARTICLES.h"
 
 

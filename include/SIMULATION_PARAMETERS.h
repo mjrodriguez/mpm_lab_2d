@@ -6,7 +6,7 @@
 #define MPM_LAB_2D_SIMULATION_PARAMETERS_H
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include <iostream>
 
 using namespace Eigen;

@@ -7,7 +7,7 @@
 
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 
 #include "INTERPOLATION.h"
 #include "ELASTOPLASTIC.h"

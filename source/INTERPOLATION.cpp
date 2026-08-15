@@ -3,7 +3,7 @@
 //
 
 
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include "../include/INTERPOLATION.h"
 
 using namespace Eigen;

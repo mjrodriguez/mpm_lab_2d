@@ -3,7 +3,7 @@
 //
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 
 #include "../include/GRID.h"
 #include "../include/INTERPOLATION.h"

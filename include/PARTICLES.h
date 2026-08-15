@@ -6,7 +6,7 @@
 #define MPM_V4_0_PARTICLES_H
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 
 #include "INTERPOLATION.h"
 #include "TOOLS.h"
