@@ -14,3 +14,10 @@ cmake --build .
 ```
 
 The resulting `mpm` executable will be in the `build` directory.
+
+# Testing:
+Unit tests use **Catch2**, fetched automatically by CMake. From the `build` directory:
+
+```
+ctest
+```
