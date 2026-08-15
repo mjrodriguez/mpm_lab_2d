@@ -2,6 +2,9 @@
 *.o
 mpm
 
+# Local scratch space (logs, notes, working markdown files)
+scratch/
+
 # CMake
 build/
 CMakeCache.txt
