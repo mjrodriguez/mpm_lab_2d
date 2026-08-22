@@ -6,7 +6,6 @@
 
 #include <vector>
 #include "../Eigen/Dense"
-#include "../include/PARTICLES.h"
 #include "../include/TOOLS.h"
 
 

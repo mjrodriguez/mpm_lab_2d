@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "../Eigen/Dense"
-#include "PARTICLES.h"
 
 
 
