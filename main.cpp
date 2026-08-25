@@ -43,8 +43,6 @@ int main() {
 	// HYPERELASTICITY SimulationParams;
 	
 	// DEFAULT_IMPLICIT_PARAMETERS SimulationParams;
-	
-    TOOLS Tools;
 
 
 	string simulationNumber = "simulation_142";
@@ -108,8 +106,8 @@ int main() {
         Grid.NodesWithMass();
 		
 		
-        // cout << "Mass on Particles = " << Tools.Sum(Particle.mass) << endl;
-        // cout << "Mass on Grid = " << Tools.Sum(Grid.mass) << endl;
+        // cout << "Mass on Particles = " << TOOLS::Sum(Particle.mass) << endl;
+        // cout << "Mass on Grid = " << TOOLS::Sum(Grid.mass) << endl;
 		
         if (currentTime == 0){
 			Particle.ComputeVolumeDensity(Grid, Interpolation);
@@ -145,8 +143,8 @@ int main() {
                                        Particle.position, Particle.elasticDeformationGradient, Particle.plasticDeformationGradient, Particle.deformationGradient, Interpolation);
 		
 		Particle.ComputePicFlipVelocities(Grid, Interpolation);
-       //  cout << "Max PIC Velocity = " << Tools.MaxNormValue(Particle.velocityPIC) << endl;
-        // cout << "Max FLIP Velocity = " << Tools. MaxNormValue(Particle.velocityFLIP) << endl;
+       //  cout << "Max PIC Velocity = " << TOOLS::MaxNormValue(Particle.velocityPIC) << endl;
+        // cout << "Max FLIP Velocity = " << TOOLS::MaxNormValue(Particle.velocityFLIP) << endl;
 		
 		Particle.UpdateParticleVelocity(SimulationParams.GetDt());
         Particle.ParticleCollision(SimulationParams.GetFrictionCoeff());
@@ -163,13 +161,13 @@ int main() {
 			cout << "Simulation = " << SimulationParams.GetSimulationName() << ", " << Particle.GetParticleSimulationName() << " | Num of Particles = " << Particle.GetNumberOfParticles() <<  endl;
 			cout << "Current Time: " << currentTime << " | Current Iteration: " << iterationCounter << " | Current Frame: " << frameNumber <<  endl;
 			cout << "Saving Directory = " << directory << endl;
-	        cout << "Mass on Particles = " << Tools.Sum(Particle.mass) << endl;
-	        cout << "Mass on Grid = " << Tools.Sum(Grid.mass) << endl;
-	        cout << "Max Force = " << Tools.MaxNormValue(Grid.force) << endl;
-	        cout << "Min Force = " << Tools.MinNormValue(Grid.force) << endl;
-			cout << "Max PIC Velocity = " << Tools.MaxNormValue(Particle.velocityPIC) << endl;
-			cout << "Max FLIP Velocity = " << Tools. MaxNormValue(Particle.velocityFLIP) << endl;
-			cout << "Max Velocity = " << Tools.MaxNormValue(Particle.velocity) << endl;
+	        cout << "Mass on Particles = " << TOOLS::Sum(Particle.mass) << endl;
+	        cout << "Mass on Grid = " << TOOLS::Sum(Grid.mass) << endl;
+	        cout << "Max Force = " << TOOLS::MaxNormValue(Grid.force) << endl;
+	        cout << "Min Force = " << TOOLS::MinNormValue(Grid.force) << endl;
+			cout << "Max PIC Velocity = " << TOOLS::MaxNormValue(Particle.velocityPIC) << endl;
+			cout << "Max FLIP Velocity = " << TOOLS::MaxNormValue(Particle.velocityFLIP) << endl;
+			cout << "Max Velocity = " << TOOLS::MaxNormValue(Particle.velocity) << endl;
 			cout << "First Particle  = " << Particle.position[0].transpose() << endl;
 			cout << "Time per Frame = " << timePerFrame << endl;
 			
