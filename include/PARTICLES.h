@@ -95,7 +95,6 @@ public:
     /****************************************************
     * PARTICLE COMPUTATIONS
     ****************************************************/
-	void ComputeVolumeDensity(  int N, double h, vector<double>& massGrid, vector<Vector2i>& massList, TOOLS Tools, INTERPOLATION Interpolation );
     void ComputeVolumeDensity(GRID& Grid, INTERPOLATION& Interpolation);
 	virtual void ParticleCollision( double frictionCoeff ) = 0;
     // void ComputePicFlipVelocities( int N, double h, vector<Vector2i>& massList, vector<VectorXd>& gridNodeWeights, vector<Vector2d>& velocityGrid, vector<Vector2d>& newVelocityGrid, TOOLS Tools, INTERPOLATION Interpolation );
