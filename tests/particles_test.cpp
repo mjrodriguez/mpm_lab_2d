@@ -80,3 +80,55 @@ TEST_CASE("PARTICLES::SetCube/SetRectangle accumulate onto existing particle cou
     REQUIRE(Particle.GetNumberOfParticles() == Catch::Approx(17.0));
     REQUIRE(Particle.m_area == Catch::Approx(1.2 * 1.2 + 2.0));
 }
+
+// mass[p] = (density * area) / numberOfParticles for every particle, so
+// total mass = density * area regardless of how many particles it's split
+// across -- mass conservation. ("area" is this 2D simulation's stand-in for
+// what a 3D version would call volume, per the TESTING_TODO wording.)
+TEST_CASE("PARTICLES::InitializeParticleMass splits density * area evenly and conserves total mass", "[particles]") {
+    const double density = 400.0;  // paper's default snow density (Table 2)
+
+    SECTION("cube") {
+        RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
+        Particle.m_numberOfParticles = 0;
+        Particle.m_area = 0;
+        Particle.SetInitialDensity(density);
+        Particle.SetCube(3, 1.2, Vector2d(0.1, 0.2));  // 9 particles, area 1.44
+
+        Particle.InitializeParticleMass();
+
+        const double totalMass = density * Particle.m_area;  // 576.0
+        REQUIRE(Particle.mass.size() == 9);
+        for (double m : Particle.mass) {
+            REQUIRE(m == Catch::Approx(totalMass / 9.0));
+        }
+
+        double summedMass = 0.0;
+        for (double m : Particle.mass) {
+            summedMass += m;
+        }
+        REQUIRE(summedMass == Catch::Approx(totalMass));
+    }
+
+    SECTION("rectangle") {
+        RECTANGLE_FREEFALL_HAT_OBSTACLE Particle;
+        Particle.m_numberOfParticles = 0;
+        Particle.m_area = 0;
+        Particle.SetInitialDensity(density);
+        Particle.SetRectangle(2, 4, 1.0, 2.0, Vector2d(0.0, 0.0));  // 8 particles, area 2.0
+
+        Particle.InitializeParticleMass();
+
+        const double totalMass = density * Particle.m_area;  // 800.0
+        REQUIRE(Particle.mass.size() == 8);
+        for (double m : Particle.mass) {
+            REQUIRE(m == Catch::Approx(totalMass / 8.0));
+        }
+
+        double summedMass = 0.0;
+        for (double m : Particle.mass) {
+            summedMass += m;
+        }
+        REQUIRE(summedMass == Catch::Approx(totalMass));
+    }
+}
