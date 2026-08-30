@@ -12,6 +12,25 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
+# Eigen is header-only. Prefer a system install (e.g. `brew install eigen` /
+# `apt install libeigen3-dev`); if it isn't found, fetch a pinned version
+# instead of vendoring the source tree in this repo.
+find_package(Eigen3 3.3 QUIET NO_MODULE)
+if(NOT Eigen3_FOUND)
+    message(STATUS "Eigen3 not found on system; fetching Eigen 3.4.0")
+    include(FetchContent)
+    set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+    set(EIGEN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        Eigen3
+        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+        GIT_TAG 3.4.0
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(Eigen3)
+endif()
+
 # Simulation logic lives in a library so both the mpm executable and the
 # test suite can link against it.
 add_library(mpm_lib
@@ -24,6 +43,7 @@ add_library(mpm_lib
     source/TOOLS.cpp
 )
 target_include_directories(mpm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mpm_lib PUBLIC Eigen3::Eigen)
 
 add_executable(mpm main.cpp)
 target_link_libraries(mpm PRIVATE mpm_lib)

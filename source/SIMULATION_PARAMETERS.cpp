@@ -3,7 +3,7 @@
 //
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include <iostream>
 
 //#include "GRID.h"

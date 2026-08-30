@@ -7,7 +7,7 @@ This code uses the paper's fixed-corotated hyperelastic model coupled with plast
 
 
 # Compiling:
-This project uses **CMake**. Since the **Eigen Linear Algebra** package is just header files, no need to install or compile it separately.
+This project uses **CMake** and depends on the **Eigen** linear algebra library. You don't need to install anything up front: CMake will use a system-installed Eigen (`3.3+`) if it finds one, and otherwise will automatically download a pinned version (`3.4.0`) at configure time.
 
 ```
 mkdir build && cd build
@@ -16,6 +16,8 @@ cmake --build .
 ```
 
 The resulting `mpm` executable will be in the `build` directory.
+
+To skip the automatic download and speed up configuring, install Eigen with your package manager first, e.g. `brew install eigen` (macOS) or `sudo apt install libeigen3-dev` (Debian/Ubuntu).
 
 # Testing:
 Unit tests use **Catch2**, fetched automatically by CMake. From the `build` directory:

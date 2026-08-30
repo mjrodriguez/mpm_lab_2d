@@ -6,7 +6,7 @@
 #define MPM_LAB_2D_ELASTOPLASTIC_H
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include <iostream>
 
 using namespace std;

@@ -9,7 +9,7 @@
 
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
 

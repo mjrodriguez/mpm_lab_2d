@@ -6,7 +6,7 @@
 #define MPM_LAB_2D_FILE_IO_H
 
 #include <vector>
-#include "../Eigen/Dense"
+#include <Eigen/Dense>
 #include "PARTICLES.h"
 #include "SIMULATION_PARAMETERS.h"
 #include "GRID.h"
