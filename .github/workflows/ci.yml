@@ -26,3 +26,32 @@ jobs:
       - name: Test
         working-directory: build
         run: ctest --output-on-failure
+
+  # Separate job (not part of the OS matrix above) following the pattern
+  # Eigen's own CI uses for its asan-ubsan job: dedicated Clang build with
+  # -fno-sanitize-recover=undefined so a UBSan hit aborts (and fails the
+  # test) instead of just printing a warning and continuing.
+  sanitize:
+    runs-on: ubuntu-latest
+
+    env:
+      CC: clang
+      CXX: clang++
+      ASAN_OPTIONS: print_stacktrace=1
+      UBSAN_OPTIONS: print_stacktrace=1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (ASan + UBSan)
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        working-directory: build
+        run: ctest --output-on-failure
