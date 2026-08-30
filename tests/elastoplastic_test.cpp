@@ -89,3 +89,31 @@ TEST_CASE("ELASTOPLASTIC::ComputeLambda applies exponential hardening based on J
         REQUIRE(lambda[2] < lambda0);
     }
 }
+
+// sigma = (2*mu/J) * (F_E - R) * F_E^T + (lambda/J) * (J_E - 1) * J_E * I,
+// the fixed-corotated Cauchy stress from Stomakhin et al. 2013, eq. 6. At
+// F_E = I, the polar decomposition gives R = I (so F_E - R = 0) and
+// J_E = det(F_E) = 1 (so J_E - 1 = 0), so both terms vanish regardless of
+// mu/lambda.
+TEST_CASE("ELASTOPLASTIC::CauchyStress is zero at the identity deformation gradient", "[elastoplastic]") {
+    ELASTOPLASTIC ConstitutiveModel;
+    const double mu0 = 100.0;
+    const double lambda0 = 200.0;
+    const double hardeningCoeff = 10.0;
+
+    vector<double> JElastic = {1.0};
+    vector<double> JPlastic = {1.0};
+    vector<Matrix2d> elasticDeformationGradient = {Matrix2d::Identity()};
+    vector<Matrix2d> R(1);
+    vector<Matrix2d> S(1);
+    vector<Matrix2d> sigma(1);
+
+    ConstitutiveModel.CauchyStress(false, mu0, lambda0, hardeningCoeff, sigma, JElastic, JPlastic,
+                                    elasticDeformationGradient, R, S);
+
+    // isApprox against an exact Zero() requires bit-exact equality (relative
+    // tolerance degenerates when one side has zero norm), which is too
+    // strict given the SVD inside ComputePolarDecomposition can leave R off
+    // from I by floating-point noise. Compare the norm against a margin instead.
+    REQUIRE(sigma[0].norm() == Catch::Approx(0.0).margin(1e-10));
+}
