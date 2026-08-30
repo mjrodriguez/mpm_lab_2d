@@ -55,3 +55,41 @@ jobs:
       - name: Test
         working-directory: build
         run: ctest --output-on-failure
+
+  # Non-blocking for now (continue-on-error on the analysis step): the
+  # codebase has a backlog of pre-existing findings (parameter-list bloat,
+  # narrowing conversions, dead stores) that predate this CI setup, so
+  # failing the job on every finding would just make the check permanently
+  # red and ignorable. Revisit making this blocking once that backlog is
+  # worked down. Checks scoped to clang-analyzer-*/bugprone-* (correctness-
+  # oriented) rather than clang-tidy's full default set, to avoid drowning
+  # real findings in style/modernization noise on a legacy codebase.
+  #
+  # CC/CXX are set to clang here (not left as the Ubuntu default of gcc) so
+  # the compile_commands.json clang-tidy reads agrees with clang-tidy's own
+  # toolchain -- verified locally that mismatched toolchains (e.g. a gcc- or
+  # Apple-Clang-generated compile database read by a different clang-tidy)
+  # produce spurious "file not found" parse errors on standard headers.
+  static-analysis:
+    runs-on: ubuntu-latest
+
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+
+      - name: Configure (generate compile_commands.json)
+        run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Run clang-tidy
+        continue-on-error: true
+        run: >
+          clang-tidy -p build
+          --checks='-*,clang-analyzer-*,bugprone-*'
+          --header-filter='.*/include/.*\.h$'
+          source/*.cpp main.cpp
