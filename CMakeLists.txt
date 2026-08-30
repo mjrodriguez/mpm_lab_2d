@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 # instead of vendoring the source tree in this repo.
 find_package(Eigen3 3.3 QUIET NO_MODULE)
 if(NOT Eigen3_FOUND)
-    message(STATUS "Eigen3 not found on system; fetching Eigen 3.4.0")
+    message(STATUS "Eigen3 not found on system; fetching Eigen 5.0.1")
     include(FetchContent)
     set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
     set(EIGEN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
@@ -25,7 +25,7 @@ if(NOT Eigen3_FOUND)
     FetchContent_Declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        GIT_TAG 3.4.0
+        GIT_TAG 5.0.1
         GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(Eigen3)
