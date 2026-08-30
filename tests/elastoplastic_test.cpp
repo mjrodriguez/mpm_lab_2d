@@ -59,3 +59,33 @@ TEST_CASE("ELASTOPLASTIC::ComputeMu applies exponential hardening based on J_P",
         REQUIRE(mu[2] < mu0);
     }
 }
+
+// lambda(J_P) = lambda0 * exp(hardeningCoeff * (1 - J_P)), from Stomakhin
+// et al. 2013 (ACM TOG 32,4, Article 102), eq. 2 — same shape as mu(J_P),
+// applied to the other Lame parameter.
+TEST_CASE("ELASTOPLASTIC::ComputeLambda applies exponential hardening based on J_P", "[elastoplastic]") {
+    ELASTOPLASTIC ConstitutiveModel;
+    const double lambda0 = 200.0;
+    const double hardeningCoeff = 10.0;
+    vector<double> JP = {1.0, 0.95, 1.05};
+
+    SECTION("plasticity disabled: lambda is just lambda0, JP is ignored") {
+        vector<double> lambda = ConstitutiveModel.ComputeLambda(false, lambda0, hardeningCoeff, JP);
+
+        REQUIRE(lambda.size() == JP.size());
+        for (double value : lambda) {
+            REQUIRE(value == Catch::Approx(lambda0));
+        }
+    }
+
+    SECTION("plasticity enabled: lambda follows the exponential hardening formula") {
+        vector<double> lambda = ConstitutiveModel.ComputeLambda(true, lambda0, hardeningCoeff, JP);
+
+        REQUIRE(lambda.size() == JP.size());
+        REQUIRE(lambda[0] == Catch::Approx(lambda0));  // J_P == 1: no plastic deformation yet, no hardening
+        REQUIRE(lambda[1] == Catch::Approx(lambda0 * exp(hardeningCoeff * (1.0 - JP[1]))));  // compressed: stiffer
+        REQUIRE(lambda[2] == Catch::Approx(lambda0 * exp(hardeningCoeff * (1.0 - JP[2]))));  // stretched: softer
+        REQUIRE(lambda[1] > lambda0);
+        REQUIRE(lambda[2] < lambda0);
+    }
+}
