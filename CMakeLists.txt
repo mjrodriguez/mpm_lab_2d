@@ -31,8 +31,9 @@ if(NOT Eigen3_FOUND)
     FetchContent_MakeAvailable(Eigen3)
 endif()
 
-add_executable(mpm
-    main.cpp
+# Simulation logic lives in a library so both the mpm executable and the
+# test suite can link against it.
+add_library(mpm_lib
     source/ELASTOPLASTIC.cpp
     source/FILE_IO.cpp
     source/GRID.cpp
@@ -41,5 +42,11 @@ add_executable(mpm
     source/SIMULATION_PARAMETERS.cpp
     source/TOOLS.cpp
 )
+target_include_directories(mpm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mpm_lib PUBLIC Eigen3::Eigen)
 
-target_link_libraries(mpm PRIVATE Eigen3::Eigen)
+add_executable(mpm main.cpp)
+target_link_libraries(mpm PRIVATE mpm_lib)
+
+enable_testing()
+add_subdirectory(tests)
