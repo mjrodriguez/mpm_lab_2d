@@ -16,6 +16,7 @@ add_executable(unit_tests
     particles_test.cpp
     levelset_test.cpp
     single_timestep_test.cpp
+    file_io_test.cpp
 )
 target_link_libraries(unit_tests PRIVATE mpm_lib Catch2::Catch2WithMain)
 
