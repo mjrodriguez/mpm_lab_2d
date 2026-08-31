@@ -20,6 +20,8 @@ using namespace Eigen;
 class PARTICLES{
 
 public:
+    virtual ~PARTICLES() = default;
+
     double m_particlesPerDirection;
     double m_cubeLength;
 	double m_area;
