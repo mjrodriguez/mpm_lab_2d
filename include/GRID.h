@@ -19,6 +19,8 @@ class GRID{
 
 public:
 
+    virtual ~GRID() = default;
+
     int m_nx;
     int m_ny;
 

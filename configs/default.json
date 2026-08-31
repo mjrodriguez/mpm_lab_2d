@@ -1,0 +1,7 @@
+{
+  "output_directory": "../output",
+  "simulation_name": "default_run",
+  "grid": "GRID_HAT_OBSTACLE",
+  "particles": "RECTANGLE_FREEFALL_HAT_OBSTACLE",
+  "parameters": "DEFAULT_PARAMETERS"
+}

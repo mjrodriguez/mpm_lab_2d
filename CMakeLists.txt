@@ -31,9 +31,24 @@ if(NOT Eigen3_FOUND)
     FetchContent_MakeAvailable(Eigen3)
 endif()
 
+# nlohmann/json for reading run configs. Same find-then-fetch pattern as Eigen.
+find_package(nlohmann_json 3.11 QUIET)
+if(NOT nlohmann_json_FOUND)
+    message(STATUS "nlohmann_json not found on system; fetching 3.12.0")
+    include(FetchContent)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.12.0
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
+
 # Simulation logic lives in a library so both the mpm executable and the
 # test suite can link against it.
 add_library(mpm_lib
+    source/CONFIG.cpp
     source/ELASTOPLASTIC.cpp
     source/FILE_IO.cpp
     source/GRID.cpp
@@ -43,7 +58,7 @@ add_library(mpm_lib
     source/TOOLS.cpp
 )
 target_include_directories(mpm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mpm_lib PUBLIC Eigen3::Eigen)
+target_link_libraries(mpm_lib PUBLIC Eigen3::Eigen nlohmann_json::nlohmann_json)
 
 add_executable(mpm main.cpp)
 target_link_libraries(mpm PRIVATE mpm_lib)

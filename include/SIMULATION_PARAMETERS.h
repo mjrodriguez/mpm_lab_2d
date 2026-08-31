@@ -50,6 +50,8 @@ protected:
 
 public:
 
+    virtual ~SIMULATION_PARAMETERS() = default;
+
     Vector2d gravity;
     bool usePlasticity;
 
