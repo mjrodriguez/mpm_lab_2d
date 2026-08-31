@@ -2,6 +2,9 @@
 *.o
 mpm
 
+# Simulation output (directory structure itself is tracked via .gitkeep files)
+output/**/*.txt
+
 # Local scratch space (logs, notes, working markdown files)
 scratch/
 
