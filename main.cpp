@@ -106,7 +106,11 @@ int main(int argc, char* argv[]) {
         // cout << "Mass on Particles = " << TOOLS::Sum(Particle->mass) << endl;
         // cout << "Mass on Grid = " << TOOLS::Sum(Grid->mass) << endl;
 
-        if (currentTime == 0){
+        // First iteration only. Was `currentTime == 0`, an exact float
+        // comparison that only worked because currentTime happened to still
+        // be unincremented on this first pass -- fragile if the loop is
+        // ever reordered. iterationCounter is an int, so this is exact.
+        if (iterationCounter == 1){
 			Particle->ComputeVolumeDensity(*Grid, Interpolation);
         }
 
@@ -149,7 +153,12 @@ int main(int argc, char* argv[]) {
 
 		timeToFrame -= SimulationParams->GetDt();
 
-		if ( timeToFrame == 0 ){
+		// Was `timeToFrame == 0`. In practice this landed on exact zero
+		// because of the dt clamp below (`if (dt > timeToFrame) SetDt(...)`
+		// forces the next dt to exactly consume the remainder), but that
+		// makes this check silently depend on that clamp existing. An
+		// epsilon tolerance is correct on its own, independent of it.
+		if ( timeToFrame <= 1e-9 ){
 			frameNumber += 1;
 			clock_t end_frame = clock();
 			 double timePerFrame = double(end_frame - begin_frame)/CLOCKS_PER_SEC;
