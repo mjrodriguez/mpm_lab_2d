@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 
 #include "../include/FILE_IO.h"
 #include "../include/SIMULATION_PARAMETERS.h"
@@ -40,7 +41,9 @@ void FILE_IO::WriteSimulationParameters(string directory, PARTICLES& Particles, 
     string filename(directory + name + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
     fileout << "Name of Simulation = " << SimulationParameters.GetSimulationName() << "_" << Particles.GetParticleSimulationName() << endl;
     fileout << "Initial Velocity (Particles) = " << Particles.GetInitialVelocity().transpose() << endl;
@@ -84,7 +87,9 @@ void FILE_IO::WriteParticlePositions(string directory, string simulationName, ve
     string filename(directory + string("/particle_position/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < particlePosition.size(); p++) {
@@ -109,7 +114,9 @@ void FILE_IO::WriteParticleVelocities(string directory, string simulationName, v
     string filename(directory + string("/particle_velocity/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < particleVelocity.size(); p++) {
@@ -134,7 +141,9 @@ void FILE_IO::WriteCauchyStress(string directory, string simulationName,  vector
     string filename(directory + string("/cauchy_stress/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < cauchyStress.size(); p++) {
@@ -155,7 +164,9 @@ void FILE_IO::WritedPsidF(string directory, string simulationName, vector<Matrix
     string filename(directory + string("/dPsi_dF/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < dpsi_df.size(); p++) {
@@ -177,7 +188,9 @@ void FILE_IO::WriteDeformationGradient(string directory, string simulationName, 
     string filename(directory + string("/deformation_gradient/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < deformationGradient.size(); p++) {
@@ -199,7 +212,9 @@ void FILE_IO::WriteElasticDeformationGradient(string directory, string simulatio
     string filename(directory + string("/elastic_deformation_gradient/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < elasticDeformationGradient.size(); p++) {
@@ -221,7 +236,9 @@ void FILE_IO::WritePlasticDeformationGradient(string directory, string simulatio
     string filename(directory + string("/plastic_deformation_gradient/") + name + iter.str() + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < plasticDeformationGradient.size(); p++) {
@@ -242,7 +259,9 @@ void FILE_IO::WriteTimePerIteration(string directory, string simulationName, vec
     string filename(directory + string("/") + name + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < timePerIteration.size(); p++) {
@@ -260,7 +279,9 @@ void FILE_IO::WriteTimeStep(string directory, string simulationName, vector<doub
     string filename(directory + string("/") + name + string(".txt"));
     ofstream fileout(filename.c_str());
 
-    assert(fileout.is_open());
+    if (!fileout.is_open()) {
+        throw runtime_error("Could not open output file \"" + filename + "\" for writing");
+    }
 
 
     for (int p = 0; p < timeStep.size(); p++) {
